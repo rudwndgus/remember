@@ -1,6 +1,8 @@
 import Phaser from 'phaser';
 import TouchControls from '../ui/TouchControls.js';
-import { MAP, PLAYER, INTRO, CAMERA, OBSTACLES, DEBUG, COLORS } from '../utils/constants.js';
+import { MAP, PLAYER, INTRO, CAMERA, DEBUG, COLORS } from '../utils/constants.js';
+import { OUTSIDE_OBJECTS, COLLISION_CELL_SIZE, COLLISION_COLORS } from '../maps/outside-collisions.js';
+import CollisionLayer from '../maps/CollisionLayer.js';
 
 const clamp = Phaser.Math.Clamp;
 const lerp = Phaser.Math.Linear;
@@ -119,7 +121,7 @@ export default class OutsideScene extends Phaser.Scene {
     // Full-map framing uses FIT (including on portrait phones); the final zoom
     // uses COVER as a minimum, so following never exposes the map's outer edge.
     const overviewZoom = Math.min(width / this.worldWidth, height / this.worldHeight) * 0.94;
-    const playZoom = Math.max(CAMERA.playZoom, width / this.worldWidth, height / this.worldHeight);
+    const playZoom = Math.max(width / this.worldWidth, height / this.worldHeight) * Math.max(1, CAMERA.coverMultiplier);
     const halfWidth = width / (2 * playZoom);
     const halfHeight = height / (2 * playZoom);
     return {
@@ -204,8 +206,9 @@ export default class OutsideScene extends Phaser.Scene {
   }
 
   createObstacles() {
+    this.collisionLayer = new CollisionLayer(OUTSIDE_OBJECTS, this.worldWidth, this.worldHeight, COLLISION_CELL_SIZE);
     this.obstacles = this.physics.add.staticGroup();
-    for (const rectangle of OBSTACLES) {
+    for (const rectangle of this.collisionLayer.rectangles) {
       const zone = this.add.zone(
         rectangle.x + rectangle.width / 2,
         rectangle.y + rectangle.height / 2,
@@ -213,12 +216,22 @@ export default class OutsideScene extends Phaser.Scene {
         rectangle.height,
       );
       this.obstacles.add(zone);
-      if (DEBUG.collisions) {
-        this.add.rectangle(zone.x, zone.y, rectangle.width, rectangle.height, 0xf5ae65, 0.18)
-          .setStrokeStyle(1, 0xf5ae65, 0.8).setDepth(4);
-      }
     }
     this.physics.add.collider(this.player, this.obstacles);
+    // Inspect the semantic object boundaries with ?debug=1&collisions=1.
+    const query = new URLSearchParams(location.search);
+    if (DEBUG.collisions || (query.has('debug') && query.has('collisions'))) {
+      this.collisionOverlay = this.add.graphics().setDepth(5);
+      for (const object of OUTSIDE_OBJECTS) {
+        const color = COLLISION_COLORS[object.kind];
+        this.collisionOverlay.lineStyle(object.thickness || 1, color, 0.95);
+        this.collisionOverlay.fillStyle(color, 0.30);
+        this.collisionOverlay.beginPath();
+        object.points.forEach(([x,y], i) => i ? this.collisionOverlay.lineTo(x,y) : this.collisionOverlay.moveTo(x,y));
+        if (!object.thickness) { this.collisionOverlay.closePath(); this.collisionOverlay.fillPath(); }
+        this.collisionOverlay.strokePath();
+      }
+    }
   }
 
   createEntranceMarker() {

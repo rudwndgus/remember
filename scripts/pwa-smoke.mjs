@@ -89,12 +89,12 @@ try {
   await page.waitForFunction(() => document.body.dataset.phase === 'overview');
   await page.screenshot({ path: join(output, useOriginalAssets ? 'original-overview.png' : 'fixture-overview.png') });
   await page.waitForFunction(() => document.body.dataset.phase === 'playing', null, { timeout: 20000 });
-  const startX = await page.evaluate(() => window.__REMEMBER_GAME__.scene.getScene('OutsideScene').player.x);
-  await page.keyboard.down('a');
+  const startY = await page.evaluate(() => window.__REMEMBER_GAME__.scene.getScene('OutsideScene').player.y);
+  await page.keyboard.down('s');
   await page.waitForTimeout(400);
-  await page.keyboard.up('a');
-  const endX = await page.evaluate(() => window.__REMEMBER_GAME__.scene.getScene('OutsideScene').player.x);
-  assert(endX < startX - 10, 'Offline keyboard movement must work');
+  await page.keyboard.up('s');
+  const endY = await page.evaluate(() => window.__REMEMBER_GAME__.scene.getScene('OutsideScene').player.y);
+  assert(endY > startY + 10, 'Offline keyboard movement must work');
   assert.deepEqual(errors, []);
   await page.screenshot({ path: join(output, useOriginalAssets ? 'original-offline-playing.png' : 'offline-fixture.png') });
   // Verify the Canvas fallback's aperture actually reveals the center while its

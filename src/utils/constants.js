@@ -25,19 +25,9 @@ export const INTRO = {
   playerZoomMs: 2400,
 };
 
-// Final play magnification; OutsideScene also enforces cover zoom so that
-// a very wide/tall viewport cannot expose space outside the map during play.
-export const CAMERA = { playZoom: 2.4 };
-
-// Simple, deliberately conservative building rectangles. Add more here later.
-// x/y describe each rectangle's top-left corner, width/height its size.
-export const OBSTACLES = [
-  { x: 1160, y: 143, width: 390, height: 296 },
-  { x: 383, y: 40, width: 185, height: 120 },
-  { x: 617, y: 214, width: 91, height: 239 },
-  { x: 727, y: 176, width: 91, height: 262 },
-  { x: 694, y: 543, width: 155, height: 207 },
-  { x: 458, y: 608, width: 123, height: 164 },
-];
+// 1 = the minimum scale that fills the screen, preserving the map aspect ratio.
+// No fixed close-up zoom: desktop shows nearly the entire neighborhood, while
+// portrait devices follow the player across the wider map.
+export const CAMERA = { coverMultiplier: 1 };
 
 export const DEBUG = { entranceMarker: false, collisions: false };

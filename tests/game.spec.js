@@ -132,11 +132,12 @@ test('circle intro preserves every phase, whole-map hold, and input lock', async
   expect(history.find(({ phase }) => phase === 'arrival').at - history.find(({ phase }) => phase === 'overview').at)
     .toBeGreaterThanOrEqual(1200);
   const cameraZoom = await page.evaluate(() => window.__REMEMBER_GAME__.scene.getScene('OutsideScene').camera.zoom);
-  expect(cameraZoom).toBeGreaterThanOrEqual(2.4);
+  const viewport = page.viewportSize();
+  expect(cameraZoom).toBeCloseTo(Math.max(viewport.width / 1619, viewport.height / 971), 5);
   await expect(page.locator('#game-hud')).toBeVisible();
   await page.screenshot({ path: testInfo.outputPath('fixture-playing.png') });
-  await pressFor(page, 'KeyD');
-  expect((await playerPosition(page)).x).toBeGreaterThan(spawn.x + 25);
+  await pressFor(page, 'KeyS');
+  expect((await playerPosition(page)).y).toBeGreaterThan(spawn.y + 25);
   await assertCameraWithinWorld(page);
 });
 
@@ -165,7 +166,8 @@ test('world and company collisions hold, and replay rebuilds one complete intro'
   await setPlayerPosition(page, { x: 1000, y: 12 });
   await pressFor(page, 'ArrowUp');
   expect((await playerPosition(page)).y).toBeGreaterThanOrEqual(0);
-  await setPlayerPosition(page, { x: 1000, y: 959 });
+  // The south edge is forest except for the road exit.
+  await setPlayerPosition(page, { x: 230, y: 959 });
   await pressFor(page, 'ArrowDown');
   expect((await playerPosition(page)).y).toBeLessThanOrEqual(971);
   await assertCameraWithinWorld(page);
@@ -208,13 +210,13 @@ test('resizing during the circle and arrival keeps framing stable; touch release
     const touch = await page.context().newCDPSession(page);
     await touch.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ ...center, id: 1 }] });
     await touch.send('Input.dispatchTouchEvent', {
-      type: 'touchMove', touchPoints: [{ x: center.x + 40, y: center.y, id: 1 }],
+      type: 'touchMove', touchPoints: [{ x: center.x, y: center.y + 40, id: 1 }],
     });
-    await expect.poll(() => page.evaluate(() => window.__REMEMBER_GAME__.scene.getScene('OutsideScene').touchControls.vector.x))
+    await expect.poll(() => page.evaluate(() => window.__REMEMBER_GAME__.scene.getScene('OutsideScene').touchControls.vector.y))
       .toBeGreaterThan(0.8);
     await page.waitForTimeout(350);
     await touch.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
-    expect((await playerPosition(page)).x).toBeGreaterThan(spawn.x + 20);
+    expect((await playerPosition(page)).y).toBeGreaterThan(spawn.y + 20);
     await expect.poll(() => page.evaluate(() => {
       const { vector } = window.__REMEMBER_GAME__.scene.getScene('OutsideScene').touchControls;
       return Math.hypot(vector.x, vector.y);
@@ -225,8 +227,8 @@ test('resizing during the circle and arrival keeps framing stable; touch release
     expect(await playerPosition(page)).toEqual(released);
     await touch.detach();
   } else {
-    await pressFor(page, 'ArrowRight');
-    expect((await playerPosition(page)).x).toBeGreaterThan(spawn.x + 25);
+    await pressFor(page, 'ArrowDown');
+    expect((await playerPosition(page)).y).toBeGreaterThan(spawn.y + 25);
   }
 
   await page.setViewportSize({ width: 844, height: 390 });
