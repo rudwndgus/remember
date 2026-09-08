@@ -8,6 +8,19 @@ const pwa = setupPWA();
 const cleanupAudio = setupAudioHooks();
 const game = new Phaser.Game(gameConfig);
 
+// Mobile visual viewport changes do not always emit an orientation event.
+// Observe the actual full-screen container so canvas and circle focus follow
+// the new dimensions even during the cinematic or browser-bar resizing.
+const viewportObserver = new ResizeObserver(([entry]) => {
+  const width = Math.round(entry.contentRect.width);
+  const height = Math.round(entry.contentRect.height);
+  if (game.isBooted && width > 0 && height > 0
+    && (game.scale.width !== width || game.scale.height !== height)) {
+    game.scale.setParentSize(width, height);
+  }
+});
+viewportObserver.observe(document.querySelector('#game'));
+
 const phaseListener = ({ detail: { phase } }) => {
   pwa.setIntroActive(!['title', 'playing'].includes(phase));
   if (phase === 'logo-focus') window.dispatchEvent(new Event('remember:start'));
@@ -32,6 +45,7 @@ document.querySelector('#replay-intro').addEventListener('click', () => {
 // Opt-in diagnostics for real browser tests; no debug overlays in normal play.
 if (import.meta.env.DEV || new URLSearchParams(location.search).has('debug')) window.__REMEMBER_GAME__ = game;
 if (import.meta.hot) import.meta.hot.dispose(() => {
+  viewportObserver.disconnect();
   game.destroy(true);
   pwa.destroy();
   cleanupAudio();
