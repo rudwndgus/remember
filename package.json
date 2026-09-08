@@ -1,0 +1,22 @@
+{
+  "name": "remember",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "A small memory of my intern life in New York, 2026.",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "build": "vite build",
+    "preview": "vite preview --host 0.0.0.0",
+    "test": "playwright test",
+    "test:ui": "playwright test --ui",
+    "test:pwa": "node scripts/pwa-smoke.mjs"
+  },
+  "dependencies": { "phaser": "^3.90.0" },
+  "devDependencies": {
+    "@playwright/test": "^1.55.0",
+    "vite": "^7.1.0",
+    "vite-plugin-pwa": "^1.0.3"
+  },
+  "engines": { "node": ">=22.12.0" }
+}

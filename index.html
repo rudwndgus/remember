@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#084c94" />
+    <meta name="description" content="A little place to remember. A playable memory of my intern life in New York, 2026." />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="remember" />
+    <link rel="icon" type="image/png" href="%BASE_URL%icons/icon-192.png" />
+    <link rel="apple-touch-icon" href="%BASE_URL%icons/apple-touch-icon.png" />
+    <title>remember — My Intern Life</title>
+  </head>
+  <body data-phase="loading">
+    <main id="app">
+      <div id="game" aria-label="A top-down memory game. Use arrow keys or WASD to walk." role="application"></div>
+      <div class="title-chrome" id="title-chrome">
+        <header class="title-header"><span class="wordmark">remember<span class="wordmark-dot">.</span></span><span class="edition">A PLAYABLE MEMORY <span>VOL. 01</span></span></header>
+        <div class="title-copy" id="title-copy">
+          <p class="eyebrow">A LITTLE PLACE TO REMEMBER</p>
+          <p class="subtitle">My Intern Life <span>—</span> New York 2026</p>
+          <button id="start-button" type="button" disabled><span class="start-dot"></span>Tap to Start<span class="start-arrow" aria-hidden="true">↗</span></button>
+          <span class="keyboard-hint">or press enter</span>
+        </div>
+        <footer class="title-footer"><span>SOME DAYS STAY WITH YOU.</span><span class="coordinates">NEW YORK, US <span class="tiny-star">✳</span> 2026</span></footer>
+      </div>
+      <div id="loading-notice" class="loading-notice" role="status">Opening a memory<span class="loading-dots">…</span></div>
+      <section id="asset-notice" class="asset-notice" hidden>
+        <span class="eyebrow">ONE LAST THING</span>
+        <h1>Your memory needs its images.</h1>
+        <p>Place your original images in these locations, then reload.</p>
+        <ul id="missing-assets"></ul>
+        <button type="button" id="retry-assets">Reload images ↗</button>
+      </section>
+      <section id="game-hud" class="game-hud" hidden aria-label="Game controls">
+        <header class="world-header"><div class="location-card"><span class="eyebrow">CHAPTER 01 <span class="chapter-line"></span> THE BEGINNING</span><h1>A place called bluu<span>.</span></h1><p>New York, 2026 <span class="location-dot">·</span> <span id="scene-status">A familiar place</span></p></div><div class="world-actions"><button id="install-app" type="button" hidden>Install <span aria-hidden="true">↧</span></button><button id="replay-intro" class="icon-button" type="button" aria-label="Replay the intro" title="Replay the intro">↺</button></div></header>
+        <div class="arrival-caption" id="arrival-caption"><span class="eyebrow">EVERY MEMORY STARTS SOMEWHERE</span><p>This is where mine began.</p></div>
+        <div class="world-footer"><div class="memory-label"><span class="memory-icon" aria-hidden="true">✳</span><span>A familiar beginning<small>TAKE YOUR TIME. LOOK AROUND.</small></span></div><span id="movement-hint"><kbd>W</kbd><span class="key-row"><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></span><span class="movement-label">or arrow keys to wander</span></span></div>
+        <div id="touch-controls" aria-label="Touch movement controls"></div>
+        <span class="world-wordmark">remember.</span>
+      </section>
+      <div id="live-status" class="sr-only" role="status" aria-live="polite"></div>
+    </main>
+    <noscript>This memory needs JavaScript. Please enable it to play.</noscript>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1619" height="971" viewBox="0 0 1619 971">
+  <!-- Calibration world for browser tests only; never shipped as a game asset. -->
+  <defs>
+    <pattern id="grid" width="100" height="100" patternUnits="userSpaceOnUse">
+      <path d="M100 0H0V100" fill="none" stroke="#ffffff" stroke-opacity=".15"/>
+    </pattern>
+  </defs>
+  <rect width="1619" height="971" fill="#77986c"/>
+  <rect width="1619" height="971" fill="url(#grid)"/>
+  <path d="M180 0H290V971H180Z M0 480H1619V600H0Z" fill="#81888a"/>
+  <path d="M235 0V971 M0 540H1619" stroke="#e9d69e" stroke-width="4" stroke-dasharray="24 18"/>
+  <path d="M300 470H1580 M1130 100V470H1580V100" fill="none" stroke="#d7c8a4" stroke-width="28"/>
+  <g fill="#d5c7aa" stroke="#625d51" stroke-width="8">
+    <rect x="1160" y="143" width="390" height="296"/>
+    <rect x="383" y="40" width="185" height="120"/>
+    <rect x="617" y="214" width="91" height="239"/>
+    <rect x="727" y="176" width="91" height="262"/>
+    <rect x="694" y="543" width="155" height="207"/>
+    <rect x="458" y="608" width="123" height="164"/>
+  </g>
+  <g fill="#40565a">
+    <rect x="1200" y="170" width="305" height="200"/>
+    <rect x="1330" y="400" width="30" height="39"/>
+  </g>
+  <circle cx="1345" cy="470" r="18" fill="none" stroke="#fff3ae" stroke-width="2"/>
+  <text x="1355" y="290" text-anchor="middle" font-size="35" fill="#fff6dc" font-family="sans-serif">COMPANY</text>
+  <text x="810" y="920" text-anchor="middle" font-size="24" fill="#183924" font-family="monospace">TEST FIXTURE · 1619 × 971 · NOT ORIGINAL ART</text>
+</svg>
