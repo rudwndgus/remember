@@ -1,5 +1,9 @@
 # remember
 
+## [🎮 웹앱 바로 실행하기](https://rudwndgus.github.io/remember/)
+
+설치 없이 휴대폰이나 PC 브라우저에서 바로 플레이할 수 있습니다.
+
 **My Intern Life · New York, 2026**
 
 미국 인턴 생활을 작은 탑다운 RPG로 기억하는 모바일 웹 게임입니다. Vite + Phaser 3 + plain JavaScript로 만들었고, GitHub Pages에 배포하거나 휴대폰 홈 화면에 PWA로 설치할 수 있습니다.
