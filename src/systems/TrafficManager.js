@@ -37,6 +37,7 @@ export default class TrafficManager {
     return vehicle;
   }
   spawnAmbient() {
+    if(this.busPriority) return;
     if(!DEBUG.ambientTraffic) return;
     if(this.vehicles.filter(v=>!v.scripted).length>=TRAFFIC.maxAmbientVehicles) return;
     const origins=['N','S','W','E'];
@@ -62,6 +63,21 @@ export default class TrafficManager {
     this.vehicles.push(bus);
     return bus;
   }
+  beginBusPriority() {
+    if(this.busPriority) return;
+    this.busPriority=new Set(this.vehicles.filter(v=>v.route.origin==='N'||v.id===this.reservation).map(v=>v.id));
+    // Finish an occupied junction first; never revoke a car already crossing.
+    const reserved=this.vehicles.find(v=>v.id===this.reservation);
+    if(reserved && !reserved.enteredIntersection && reserved.distance+reserved.length/2<reserved.route.entryDistance) this.reservation=null;
+  }
+  endBusPriority() {this.busPriority=null;}
+  signalsNow() {
+    if(!this.busPriority) return signalAt(this.elapsed);
+    const occupied=this.vehicles.find(v=>v.id===this.reservation);
+    // One continuous priority window: the bus cannot catch a second red.
+    const axis=occupied?.route.axis||'NS';
+    return {NS:axis==='NS'?'green':'red',EW:axis==='EW'?'green':'red'};
+  }
   canClearExit(vehicle) {
     const exit=sampleRoute(vehicle.route,vehicle.route.exitDistance+vehicle.length/2+12);
     const c=Math.cos(exit.angle),s=Math.sin(exit.angle);
@@ -82,7 +98,7 @@ export default class TrafficManager {
     this.elapsed+=delta;
     this.spawnIn-=delta;
     if(this.spawnIn<=0) {this.spawnAmbient();this.spawnIn=TRAFFIC.spawnMinMs+this.random()*(TRAFFIC.spawnMaxMs-TRAFFIC.spawnMinMs);}
-    const signals=signalAt(this.elapsed);
+    const signals=this.signalsNow();
     // Closest waiting vehicle claims the junction; no conflicting left turns or
     // cross-traffic enter until its rear has cleared all crosswalks.
     for(const v of this.vehicles) if(!v.enteredIntersection && v.distance+v.length/2>v.route.entryDistance-80) v.waitSince??=this.elapsed;
@@ -93,7 +109,8 @@ export default class TrafficManager {
       || (a.route.entryDistance-a.distance-a.length/2)-(b.route.entryDistance-b.distance-b.length/2));
     for(const v of order) {
       if(v.destroyed) continue;
-      let target=v.cruiseSpeed,limit=v.route.length;
+      const clearing=this.busPriority?.has(v.id);
+      let target=v.cruiseSpeed*(clearing?1.6:1),limit=v.route.length;
       const front=v.distance+v.length/2;
       if(this.reservation===v.id && front>=v.route.entryDistance) v.enteredIntersection=true;
       if(this.reservation===v.id && !v.enteredIntersection && signals[v.route.axis]!=='green') this.reservation=null;
@@ -101,7 +118,7 @@ export default class TrafficManager {
         if(this.reservation===v.id && v.distance-v.length/2>v.route.exitDistance+8) {
           this.reservation=null;v.clearedIntersection=true;
         } else if(front<v.route.entryDistance+1) {
-          if(!this.reservation && signals[v.route.axis]==='green' && front>v.route.entryDistance-80 && this.firstInLane(v) && this.canClearExit(v)) this.reservation=v.id;
+          if(!this.reservation && signals[v.route.axis]==='green' && (!this.busPriority || v.route.origin==='N') && front>v.route.entryDistance-80 && this.firstInLane(v) && this.canClearExit(v)) this.reservation=v.id;
           if(this.reservation!==v.id) limit=Math.min(limit,v.route.entryDistance-v.length/2-5);
         }
       }
@@ -136,7 +153,7 @@ export default class TrafficManager {
       const remaining=Math.max(0,limit-v.distance);
       const brake=v.type==='bus'?65:TRAFFIC.braking;
       target=Math.min(target,Math.sqrt(2*brake*remaining));
-      const change=(target<v.speed?brake:(v.type==='bus'?15:TRAFFIC.acceleration))*dt;
+      const change=(target<v.speed?brake:(clearing?60:v.type==='bus'?15:TRAFFIC.acceleration))*dt;
       const oldSpeed=v.speed;
       v.speed+=Math.max(-change,Math.min(change,target-v.speed));
       let distance=Math.min(limit,v.distance+v.speed*dt);
@@ -168,7 +185,7 @@ export default class TrafficManager {
     return true;
   }
   drawSignals() {
-    const states=signalAt(this.elapsed),g=this.signals;
+    const states=this.signalsNow(),g=this.signals;
     g.clear();
     for(const light of SIGNAL_LOCATIONS) {
       g.fillStyle(0x555f58).fillRect(light.x-1,light.y+18,3,12);

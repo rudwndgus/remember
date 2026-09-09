@@ -44,12 +44,13 @@ test('walk, wait, Bus 163 approach, manual boarding, phone and return',async({pa
   const start=await page.evaluate(()=>{const b=window.__REMEMBER_GAME__.scene.getScene('OutsideScene').busEvent.bus;return {x:b.x,y:b.y};});
   expect(start.x).toBeCloseTo(196);expect(start.y).toBeLessThan(0);
   await expect(page.locator('#board-bus')).toBeVisible({timeout:65000});
+  expect(await page.evaluate(()=>window.__REMEMBER_GAME__.scene.getScene('OutsideScene').traffic.busPriority)).toBeNull();
   expect(await page.evaluate(()=>window.__REMEMBER_GAME__.scene.getScene('OutsideScene').busEvent.bus.y)).toBeCloseTo(827,0);
   await page.screenshot({path:`artifacts/bus-stop-${isMobile?'mobile':'desktop'}.png`});
   expect(await page.evaluate(()=>window.__REMEMBER_GAME__.scene.getScene('OutsideScene').controlsEnabled)).toBe(true);
   if(isMobile) await page.locator('#board-bus').tap();else await page.keyboard.press('e');
   await expect(page.locator('body')).toHaveAttribute('data-phase','boarding');
-  await expect(page.locator('.boarding-coach')).toContainText('163');
+  await expect(page.locator('.boarding-coach svg')).toHaveAttribute('aria-label','Pixel-art NJ Transit Bus 163 at the original neighborhood stop');
   await page.waitForTimeout(1600);
   await page.screenshot({path:`artifacts/boarding-${isMobile?'mobile':'desktop'}.png`});
   await expect(page.locator('body')).toHaveAttribute('data-phase','on-bus');

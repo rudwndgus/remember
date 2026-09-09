@@ -5,4 +5,9 @@
 @keyframes passing{to{transform:translateX(25%)}}
 @media(max-width:600px){.bus-cue{bottom:190px;font-size:10px;width:max-content}.board-bus{left:auto;right:18px;transform:none;bottom:max(80px,env(safe-area-inset-bottom));gap:9px;padding:12px}.action-key{display:none}.boarding-coach{width:145vw;top:56%}.boarding-heading{top:13%}.interior-heading{top:6%}.memory-phone{bottom:max(5%,env(safe-area-inset-bottom));max-height:75%;width:300px}.interior-window{width:39%}}
 @media(max-height:540px){.bus-cue{bottom:90px}.board-bus{bottom:20px;right:20px;left:auto;transform:none}.boarding-heading{top:6%;left:6%}.boarding-heading h1{font-size:24px;margin-top:8px}.boarding-coach{width:62vw;top:57%}.boarding-caption{bottom:7%;font-size:8px}.boarding-caption small{max-width:180px;line-height:1.6}.interior-heading{left:3%;right:auto;top:28%;width:25%}.interior-heading .eyebrow{font-size:6px}.interior-heading p{font-size:23px}.memory-phone{left:61%;max-height:92%;bottom:3%;width:290px;transform:translateX(-50%) rotate(-2deg)}.phone-status{margin-bottom:16px}.phone-journey{margin-top:15px}.phone-intro{margin-bottom:14px}}
+.bus-boarding .boarding-sky,.bus-boarding .boarding-trees,.bus-boarding .boarding-road{display:none}
+.bus-boarding .boarding-coach{width:100%;height:100%;top:50%;filter:none;transform:translate(-50%,-50%);image-rendering:pixelated}
+.bus-boarding .boarding-coach svg{width:100%;height:100%}
+.bus-boarding .boarding-heading,.bus-boarding .boarding-caption{z-index:1;background:#182a26df;padding:14px 18px;width:fit-content;max-width:84%;text-shadow:none}
+.bus-boarding .boarding-heading h1,.bus-boarding .boarding-heading .eyebrow{color:#f3ecd4}
 @media(prefers-reduced-motion:reduce){.passing-scenery{animation:none}}

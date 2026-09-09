@@ -4,6 +4,35 @@ import {createTrafficRoute,sampleRoute,signalAt,TRAFFIC,vehicleClearance} from '
 import CollisionLayer from '../src/maps/CollisionLayer.js';
 import {OUTSIDE_OBJECTS} from '../src/maps/outside-collisions.js';
 import TrafficManager from '../src/systems/TrafficManager.js';
+import {BUS_163} from '../src/data/outside-locations.js';
+
+test('Bus priority clears queued routes without teleporting, then restores signals',()=>{
+  assert.equal(BUS_163.waitMs,2000);
+  globalThis.window={dispatchEvent(){}};
+  const drawable=()=>{const object=new Proxy({}, {get:()=>()=>object});return object;};
+  const scene={add:{graphics:drawable,image:drawable,text:drawable},textures:{exists:()=>true}};
+  const t=new TrafficManager(scene);t.spawnIn=100000;t.elapsed=17000;
+  const cars=['left','right','straight'].map((turn,i)=>{const v=t.addVehicle({origin:'N',turn});v.positionAt(480-i*100);return v;});
+  const occupied=t.addVehicle({origin:'E'});occupied.positionAt(occupied.route.entryDistance+50);occupied.enteredIntersection=true;t.reservation=occupied.id;
+  const routes=cars.map(v=>v.route);
+  t.beginBusPriority();const bus=t.spawnBus163();assert.ok(bus);
+  const previous=new Map();let arrival=null,greenSeen=false;
+  const overlap=(a,b)=>[a.angle,a.angle+Math.PI/2,b.angle,b.angle+Math.PI/2].every(axis=>{
+    const extent=v=>Math.abs(Math.cos(v.angle-axis))*v.length/2+Math.abs(Math.sin(v.angle-axis))*v.width/2;
+    return Math.abs((b.x-a.x)*Math.cos(axis)+(b.y-a.y)*Math.sin(axis))<extent(a)+extent(b)-.1;
+  });
+  for(let i=0;i<900;i++){
+    t.update(50,{x:150,y:831});
+    const green=t.signalsNow().NS==='green';if(greenSeen)assert.ok(green,'no second signal wait');greenSeen||=green;
+    for(const v of t.vehicles){const old=previous.get(v.id);if(old!==undefined)assert.ok(v.distance>=old&&v.distance-old<=v.cruiseSpeed*1.6*.05+.01);previous.set(v.id,v.distance);}
+    for(let a=0;a<t.vehicles.length;a++)for(let b=a+1;b<t.vehicles.length;b++)assert.equal(overlap(t.vehicles[a],t.vehicles[b]),false,'vehicles never overlap');
+    cars.forEach((v,j)=>{assert.equal(v.route,routes[j]);if(v.destroyed)assert.ok(v.distance>=v.route.length-.1,'only normal route-end cleanup');});
+    if(bus.speed===0&&Math.abs(bus.y-827)<.4){arrival=i*50;break;}
+  }
+  assert.ok(arrival!==null&&arrival<30000,`queued arrival took ${arrival}ms`);
+  t.endBusPriority();assert.equal(t.busPriority,null);assert.deepEqual(t.signalsNow(),signalAt(t.elapsed));
+  t.destroy();delete globalThis.window;
+});
 
 test('all twelve routes stay on roads and turns leave in the correct direction',()=>{
   const exits={N:{straight:'S',left:'E',right:'W'},S:{straight:'N',left:'W',right:'E'},W:{straight:'E',left:'N',right:'S'},E:{straight:'W',left:'S',right:'N'}};

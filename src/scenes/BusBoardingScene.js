@@ -16,7 +16,7 @@ export default class BusBoardingScene extends Phaser.Scene {
     this.progress={opacity:0,approach:0};this.element.style.opacity=0;
     this.tweens.add({targets:this.progress,opacity:1,duration:950,ease:'Sine.easeInOut',onUpdate:()=>{this.element.style.opacity=this.progress.opacity;}});
     this.tweens.add({targets:this.progress,approach:1,duration:BUS_163.boardingMs,ease:'Sine.easeInOut',
-      onUpdate:()=>{coach.style.transform=`translate(-50%, -50%) scale(${.72+this.progress.approach*.47})`;},
+      onUpdate:()=>{coach.style.transform=`translate(-50%, -50%) scale(${1+this.progress.approach*.12})`;},
       onComplete:()=>this.scene.launch('BusInteriorScene',{outsideKey:this.outsideKey}),
     });
     this.events.once('shutdown',()=>this.element.remove());

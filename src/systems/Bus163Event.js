@@ -51,7 +51,7 @@ export default class Bus163Event {
       if(!this.inside()) {this.waitElapsed=0;this.setState('IDLE');}
       else {
         this.waitElapsed+=delta;
-        if(this.waitElapsed>=BUS_163.waitMs) this.setState('BUS_APPROACHING');
+        if(this.waitElapsed>=BUS_163.waitMs) {this.traffic.beginBusPriority();this.setState('BUS_APPROACHING');}
       }
     }
     if(this.state==='BUS_APPROACHING') {
@@ -62,7 +62,7 @@ export default class Bus163Event {
       }
     }
     if(this.state==='BUS_STOPPING' && this.bus.stopDistance-this.bus.distance<.4 && this.bus.speed<1) {
-      this.setState('BUS_READY');emitAudioCue('bus-door');
+      this.setState('BUS_READY');this.traffic.endBusPriority();emitAudioCue('bus-door');
       if(this.lockedForArrival) {this.scene.setPlayerControl(true);this.lockedForArrival=false;}
     }
     this.renderCue();
