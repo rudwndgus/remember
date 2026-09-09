@@ -21,5 +21,5 @@ export const OUTSIDE_LOCATIONS = {
 
 export const BUS_163 = {
   route: '163', waitMs: 2000, closeDistance: 105,
-  interactionDistance: 108, boardingMs: 3600,
+  interactionDistance: 108, boardingMs: 4800,
 };

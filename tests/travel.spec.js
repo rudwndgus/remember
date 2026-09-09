@@ -52,8 +52,18 @@ test('walk, wait, Bus 163 approach, manual boarding, phone and return',async({pa
   await expect(page.locator('body')).toHaveAttribute('data-phase','boarding');
   await expect(page.locator('.boarding-coach svg')).toHaveAttribute('aria-label','Pixel-art NJ Transit Bus 163 at the original neighborhood stop');
   await page.waitForTimeout(1600);
+  const passenger=page.locator('#boarding-passenger');
+  await expect(passenger).toBeVisible();
+  const passengerX=Number(await passenger.getAttribute('x'));
+  await page.waitForTimeout(450);
+  expect(Number(await passenger.getAttribute('x'))).toBeGreaterThan(passengerX);
   await page.screenshot({path:`artifacts/boarding-${isMobile?'mobile':'desktop'}.png`});
+  await expect(page.locator('.bus-boarding')).toHaveAttribute('data-boarding-step','seated');
+  await expect(passenger).toHaveCSS('opacity','0');
   await expect(page.locator('body')).toHaveAttribute('data-phase','on-bus');
+  await expect(page.locator('.memory-phone')).toHaveCount(0);
+  await expect(page.locator('.seat-dialogue h1')).toHaveText('어디로 갈까?');
+  const travel=Number(await page.locator('.pixel-bus-cabin').getAttribute('data-travel'));
   for(const id of ['new-york','memories']) {
     const button=page.locator(`[data-destination="${id}"]`);
     if(isMobile) await button.tap();else await button.click();
@@ -61,6 +71,8 @@ test('walk, wait, Bus 163 approach, manual boarding, phone and return',async({pa
     await expect(page.locator('.destination-preview')).toBeVisible();
   }
   await page.screenshot({path:`artifacts/interior-${isMobile?'mobile':'desktop'}.png`});
+  await page.waitForTimeout(400);
+  expect(Number(await page.locator('.pixel-bus-cabin').getAttribute('data-travel'))).toBeGreaterThan(travel);
   if(isMobile){await page.setViewportSize({width:844,height:390});await page.locator('.get-off-bus').scrollIntoViewIfNeeded();await expect(page.locator('.get-off-bus')).toBeInViewport();}
   await page.locator('.get-off-bus').click();
   await expect(page.locator('body')).toHaveAttribute('data-phase','playing');

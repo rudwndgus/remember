@@ -11,3 +11,23 @@
 .bus-boarding .boarding-heading,.bus-boarding .boarding-caption{z-index:1;background:#182a26df;padding:14px 18px;width:fit-content;max-width:84%;text-shadow:none}
 .bus-boarding .boarding-heading h1,.bus-boarding .boarding-heading .eyebrow{color:#f3ecd4}
 @media(prefers-reduced-motion:reduce){.passing-scenery{animation:none}}
+/* Shared pixel treatment for boarding and the seated destination scene. */
+.bus-boarding,.bus-interior{font-family:'Courier New',Gulim,monospace}
+.bus-boarding .boarding-heading h1{font-family:inherit;font-size:clamp(18px,2.6vw,30px);font-weight:700;line-height:1.5;margin:7px 0}
+.bus-boarding .boarding-heading,.bus-boarding .boarding-caption{border:2px solid #83927c;box-shadow:3px 3px #192d29}
+.bus-boarding .boarding-heading{top:max(4%,env(safe-area-inset-top));left:4%;max-width:70%;padding:10px 14px}
+.bus-boarding .boarding-caption{left:4%;bottom:max(4%,env(safe-area-inset-bottom))}
+.pixel-bus-cabin{position:absolute;inset:0;width:100%;height:100%;image-rendering:pixelated}
+.seat-heading{position:absolute;top:max(24px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);text-align:center;color:#eee7c9;white-space:nowrap}
+.seat-heading span{background:#233b35;border:2px solid #9aa58a;padding:7px 13px;font-size:11px;letter-spacing:2px;box-shadow:3px 3px #253a34}
+.seat-heading p{font-size:12px;background:#2b4039;padding:7px 10px;margin-top:17px}
+.seat-dialogue{position:absolute;right:4%;bottom:max(4%,env(safe-area-inset-bottom));width:410px;max-width:92%;max-height:66%;overflow:auto;background:#eee7cd;color:#314b45;border:3px solid #283e36;outline:2px solid #a5ae91;box-shadow:6px 6px #20372de0;padding:20px;scrollbar-color:#698478 #ddd8bd;scrollbar-width:thin}
+.seat-route{font-size:10px;letter-spacing:2px;color:#6b806c}.seat-dialogue h1{font:700 24px 'Courier New',Gulim,monospace;margin:12px 0 8px}.seat-intro{font-size:12px;margin:0 0 16px;color:#71816c}
+.bus-interior .destination-button{font-family:inherit;border:2px solid #9eab90;border-radius:0;box-shadow:3px 3px #c0c5a6;background:#f7efd7;min-height:58px;padding:9px 11px;margin:10px 0;color:#2f4b44}
+.bus-interior .destination-button strong{font:700 17px 'Courier New',Gulim,monospace}.bus-interior .destination-button small{font-size:10px;line-height:1.4;color:#73816d}
+.bus-interior .destination-icon{border-radius:0;background:#d8dfc6;color:#42695b;border:1px solid #aab99c}
+.bus-interior .destination-button[aria-pressed=true]{background:#c7d7b6;border-color:#496d58;box-shadow:3px 3px #7b936d}
+.bus-interior .destination-preview{border-left:3px solid #b98654;margin:13px 0;padding-left:10px}.bus-interior .destination-preview p{font:11px/1.6 'Courier New',Gulim,monospace;color:#526c59}.bus-interior .get-off-bus{font:12px 'Courier New',Gulim,monospace;color:#526d58;margin-top:12px;border-top:2px solid #c7cbb0;min-height:42px}
+.bus-cue,.board-bus,.bus-route-pill{border-radius:0}.board-bus{border:2px solid #516c5d;box-shadow:4px 4px #20372da0}
+@media(max-width:600px){.seat-dialogue{left:5%;right:auto;width:90%;bottom:max(18px,env(safe-area-inset-bottom));max-height:43%;padding:14px}.seat-heading{top:max(28px,env(safe-area-inset-top))}.seat-dialogue h1{font-size:22px}.seat-intro{font-size:10px;margin-bottom:10px}.bus-interior .destination-button{min-height:54px}.bus-boarding .boarding-heading{max-width:86%;top:4%}.bus-boarding .boarding-heading .eyebrow{font-size:7px}}
+@media(max-height:540px){.seat-dialogue{left:auto;right:3%;width:340px;max-width:46%;max-height:88%;bottom:5%;padding:12px}.seat-heading{left:23%;top:7%}.seat-heading p{font-size:10px}.seat-dialogue h1{font-size:20px}.seat-intro{font-size:10px}.bus-boarding .boarding-heading{max-width:48%}}

@@ -33,7 +33,7 @@ const phaseListener = ({ detail: { phase } }) => {
     arrival: 'Arriving at the company entrance.',
     playing: 'Welcome to bluu. Use arrow keys, WASD, or the touch joystick to walk.',
     boarding: 'Boarding NJ Transit Bus 163.',
-    'on-bus': 'You are on Bus 163. Choose a destination on your phone, or get off at the bus stop.',
+    'on-bus': 'You are on Bus 163. Choose your next stop from your bus seat, or get off at the bus stop.',
     alighting: 'Returning to the bus stop.',
   };
   if (descriptions[phase]) document.querySelector('#live-status').textContent = descriptions[phase];
