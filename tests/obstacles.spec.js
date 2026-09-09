@@ -4,7 +4,7 @@ test('original map obstacles stop actual movement from roads and clear aisles', 
   test.skip(isMobile, 'Shared physics is verified once; mobile input has dedicated coverage.');
   const errors = [];
   page.on('pageerror', (error) => errors.push(error.message));
-  await page.goto('/?debug=1&collisions=1');
+  await page.goto('/?debug=1&collisions=1&no-traffic');
   await expect(page.locator('body')).toHaveAttribute('data-phase', 'title');
   await page.keyboard.press('Enter');
   await expect(page.locator('body')).toHaveAttribute('data-phase', 'playing');

@@ -4,6 +4,31 @@
 
 설치 없이 휴대폰이나 PC 브라우저에서 바로 플레이할 수 있습니다.
 
+**업데이트: Dunkin · 신호를 지키는 교통 · Bus 163 탑승** — 왼쪽 아래 정류장에서 2.6초 기다리면 북쪽에서 163번 버스가 내려옵니다. 정차 후 **Board Bus 163** 버튼 또는 **E / Enter**로 탑승하세요. 버스 안 휴대폰에서 New York / Memories를 선택할 수 있습니다. 목적지는 현재 안내용 미리보기이며, **Get off**로 같은 정류장에 돌아옵니다.
+
+차량은 차선, 좌·우회전, 방향지시등, 적색·황색 신호와 교차로 진입 순서를 따릅니다. 보행자 앞에서 제동하며 위험이 가까우면 작은 `!`가 나타나고 접촉 방향 이동을 막습니다. 일반 차량은 최대 9대, 정류장 이벤트 버스는 별도 1대입니다. 지도 충돌은 건물·주차 차량·화단·담장 등 개별 요소를 추적한 격자를 사용하며, 수백 개의 물리 바디를 만들지 않습니다.
+
+## Bus 163 수정 안내
+
+모든 좌표는 원본 지도 **1619 × 971** 기준입니다. 이미지의 노란·빨간 원은 지시 표시로만 해석했으며 게임에 표시하지 않습니다. 버스 사진은 외관 참고용이며 게임 노선은 항상 **163**입니다.
+
+| 설정 | 파일 / 기본값 |
+| --- | --- |
+| Dunkin 간판 | `src/data/outside-locations.js`: `DUNKIN_X=476`, `DUNKIN_Y=142` |
+| 기다리는 구역 | 같은 파일: `BUS_STOP_X=133`, `BUS_STOP_Y=831`, 폭 `56`, 높이 `72` |
+| 버스 출발 / 정차 | `OUTSIDE_LOCATIONS.bus163Spawn={x:196,y:-96}`, `bus163Stop={x:196,y:827}` |
+| 하차 위치 | `OUTSIDE_LOCATIONS.bus163Return={x:146,y:847}` |
+| 대기 / 탑승 연출 | `BUS_163.waitMs=2600`, `boardingMs=3600` |
+| 교통량·신호·경로 | `src/data/traffic.js`의 `TRAFFIC`, `VEHICLE_DEFINITIONS`, `routeSegments` |
+
+정차점을 조절하려면 `bus163Stop`을 수정하세요. 버스는 교차로 아래에서 이 좌표로 부드럽게 접근합니다. 남행 차선과 정류장에 맞는 범위에서 바꾸고, 대기 구역과 `bus163Return`도 보도 위에 유지하세요. `?debug=1&zones=1&buspath=1&traffic=1`은 구역·경로를 표시합니다. `&collisions=1`은 정적 장애물, `&no-traffic`은 테스트용 일반 교통 비활성화입니다. 평상시에는 디버그 표시가 없습니다.
+
+목적지 추가는 `src/data/destinations.js`의 `BUS_163_DESTINATIONS`에 `id`, `name`, `subtitle`, `icon`, `preview`, `scene`을 추가하면 됩니다. `scene:null`은 미리보기입니다. 실제 Phaser 씬을 `src/game/config.js`에 등록하고 해당 키를 `scene`에 지정하면 선택 시 이동합니다.
+
+차량 임시 그림은 `src/visuals/vehicle-art.js`에서 생성하며 `src/systems/Vehicle.js`에서 사용합니다. 교체 스프라이트는 오른쪽을 향하도록 만들고 설정된 차량 크기·중심을 유지하세요. 탑승 장면의 전면 버스 그림은 `src/visuals/bus-boarding-art.js`, 실내 배경과 휴대폰 스타일은 `src/bus.css`에서 교체할 수 있습니다. 외부 이미지나 소리 다운로드 없이 오프라인으로 동작합니다. 오디오 연결 지점은 `src/audio/hooks.js`의 `remember:audio` 이벤트입니다.
+
+추가 파일: `src/data/*`, `src/systems/{TrafficManager,Vehicle,Bus163Event}.js`, `src/visuals/*`, `src/scenes/{BusBoardingScene,BusInteriorScene}.js`, `src/game/debug.js`, `src/bus.css`, `tests/travel.spec.js`. 기존 OutsideScene, CollisionLayer, 지도 장애물, 게임 설정, PWA 단계 안내와 테스트를 확장했습니다. 인트로의 원형 확대·지도 공개 순서는 유지합니다.
+
 **My Intern Life · New York, 2026**
 
 미국 인턴 생활을 작은 탑다운 RPG로 기억하는 모바일 웹 게임입니다. Vite + Phaser 3 + plain JavaScript로 만들었고, GitHub Pages에 배포하거나 휴대폰 홈 화면에 PWA로 설치할 수 있습니다.
@@ -79,7 +104,7 @@ public/
 
 원본 맵을 직접 확인해 건물, 개별 차량, 화단, 숲, 담장·울타리, 공사 장비, 자재와 가로등을 별도 객체로 지정했습니다. 각 객체는 고유 `id`, 종류 `kind`, 원본 픽셀 좌표 `points`를 가집니다. 사선 담장에는 선의 두께도 지정합니다. 건물 안의 옥상 설비는 건물 자체의 충돌 영역에 포함됩니다.
 
-충돌 경계는 2픽셀 단위로 합친 다음 사각형 물리 바디로 변환합니다. 따라서 경사진 외벽과 울타리도 막히며, 빈 주차면·횡단보도·회사 출입구·계단은 걸을 수 있습니다. 움직임 판정은 캐릭터 발 부분을 기준으로 합니다.
+충돌 경계는 2픽셀 격자로 합치고, 이동을 작은 간격으로 나누어 발 영역을 검사합니다. 경사진 외벽과 얇은 울타리도 막히며, 빈 주차면·횡단보도·회사 출입구·계단은 걸을 수 있습니다. 격자 기반 이동이므로 정적 장애물마다 물리 바디를 생성하지 않습니다.
 
 [충돌 영역 겹쳐 보기](https://rudwndgus.github.io/remember/?debug=1&collisions=1)에서 시작하면 색으로 표시된 물체 경계를 확인할 수 있습니다. 빨강은 건물, 파랑은 차량, 노랑은 화단, 초록은 숲, 보라는 울타리, 분홍은 벽, 주황은 장비입니다. 일반 실행에는 이 표시가 나오지 않습니다.
 
@@ -124,6 +149,7 @@ VITE_BASE_PATH=/remember/
 npx playwright install chromium
 npm test
 npm run test:collisions
+node --test tests/traffic.node.js
 npm run test:pwa
 ```
 
@@ -131,7 +157,9 @@ npm run test:pwa
 
 추가 충돌 브라우저 테스트는 실제 원본을 사용해 차량·화단·건물·얇은 벽·울타리·장비·숲·가로등·사선 담장으로 직접 걸어가며 통과가 차단되는지 검사합니다. `npm run test:collisions`는 지도 기준 좌표의 장애물 판정과 출입구·주차장·도로 사이의 연결성을 확인합니다.
 
-`npm run test:pwa`는 포함된 원본 이미지로 별도의 프로덕션 빌드를 만들고 `/remember/` 경로, 오프라인 재실행과 이동, Canvas 렌더러의 원형 공개를 확인합니다. 결과와 스크린샷은 `artifacts/pwa-smoke/`에 저장됩니다. 원본 파일이 없는 환경에서만 임시 검증 이미지를 사용합니다.
+`tests/travel.spec.js`는 PC 키보드와 모바일 터치 조이스틱으로 정류장까지 걸어간 뒤 실제 신호를 기다리고, 163번 버스 탑승·목적지 선택·하차를 확인합니다. 신호 정지, 회전, 보행자 경고, 대기 취소도 검사합니다. `tests/traffic.node.js`는 12개 차선 경로, 신호 충돌 방지, 얇은 담장, 장시간 교통량 상한·정리와 버스 도착을 검사합니다.
+
+`npm run test:pwa`는 포함된 원본 이미지로 별도의 프로덕션 빌드를 만들고 `/remember/` 경로, 오프라인 재실행과 이동, Canvas 렌더러의 원형 공개, 오프라인 버스 탑승·목적지 선택·하차를 확인합니다. 결과와 스크린샷은 `artifacts/pwa-smoke/`에 저장됩니다. 원본 파일이 없는 환경에서만 임시 검증 이미지를 사용합니다.
 
 설치된 Edge로 검사하려면 PowerShell에서 `$env:PLAYWRIGHT_CHANNEL = 'msedge'`를 설정한 뒤 테스트를 실행할 수도 있습니다.
 

@@ -31,7 +31,7 @@ async function openGame(page) {
       window.__observedPhases.push({ phase, at: performance.now() });
     });
   });
-  await page.goto('/?debug=1');
+  await page.goto('/?debug=1&no-traffic');
   await phase(page, 'title');
 }
 

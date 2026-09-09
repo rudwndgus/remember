@@ -94,4 +94,18 @@ export default class CollisionLayer {
     }
     return false;
   }
+
+  // Sweep the player's 8×6 feet in small increments. This retains precise static
+  // collisions without thousands of physics bodies and cannot tunnel a thin fence.
+  moveFeet(x,y,dx,dy,canEnter=()=>true) {
+    const steps=Math.max(1,Math.ceil(Math.max(Math.abs(dx),Math.abs(dy))/1.5));
+    const sx=dx/steps,sy=dy/steps;
+    for(let i=0;i<steps;i++) {
+      const nx=Math.max(4,Math.min(this.width-4,x+sx));
+      if(!this.overlaps(nx-4,y-6,8,6) && canEnter(nx,y,x,y)) x=nx;
+      const ny=Math.max(6,Math.min(this.height,y+sy));
+      if(!this.overlaps(x-4,ny-6,8,6) && canEnter(x,ny,x,y)) y=ny;
+    }
+    return {x,y};
+  }
 }

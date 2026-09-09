@@ -125,7 +125,18 @@ try {
   await page.evaluate(() => window.__REMEMBER_GAME__.scene.getScene('OutsideScene').tweens.resumeAll());
   await page.waitForFunction(() => document.body.dataset.phase === 'playing', null, { timeout: 20000 });
   assert.deepEqual(errors, []);
-  console.log(`PASS: /remember/ manifest + precached assets + offline reload + complete intro + movement + Canvas iris (${useOriginalAssets ? 'original user images' : 'synthetic fixtures only'}).`);
+  await context.setOffline(true);
+  await page.evaluate(()=>window.__REMEMBER_GAME__.scene.getScene('OutsideScene').player.body.reset(150,831));
+  await page.locator('#board-bus').waitFor({state:'visible',timeout:65000});
+  await page.locator('#board-bus').click();
+  await page.waitForFunction(()=>document.body.dataset.phase==='on-bus');
+  await page.locator('[data-destination="new-york"]').click();
+  assert.equal(await page.locator('[data-destination="new-york"]').getAttribute('aria-pressed'),'true');
+  await page.screenshot({path:join(output,'offline-bus-interior.png')});
+  await page.locator('.get-off-bus').click();
+  await page.waitForFunction(()=>document.body.dataset.phase==='playing');
+  assert.deepEqual(errors,[]);
+  console.log(`PASS: /remember/ manifest + precached assets + offline reload + complete intro + movement + Canvas iris + offline Bus 163 boarding, phone and return (${useOriginalAssets ? 'original user images' : 'synthetic fixtures only'}).`);
 } finally {
   await context?.close();
   await browser.close();

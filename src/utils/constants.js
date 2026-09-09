@@ -30,4 +30,4 @@ export const INTRO = {
 // portrait devices follow the player across the wider map.
 export const CAMERA = { coverMultiplier: 1 };
 
-export const DEBUG = { entranceMarker: false, collisions: false };
+export { DEBUG } from '../game/debug.js';

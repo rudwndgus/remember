@@ -3,6 +3,9 @@ import TouchControls from '../ui/TouchControls.js';
 import { MAP, PLAYER, INTRO, CAMERA, DEBUG, COLORS } from '../utils/constants.js';
 import { OUTSIDE_OBJECTS, COLLISION_CELL_SIZE, COLLISION_COLORS } from '../maps/outside-collisions.js';
 import CollisionLayer from '../maps/CollisionLayer.js';
+import TrafficManager from '../systems/TrafficManager.js';
+import Bus163Event from '../systems/Bus163Event.js';
+import {addOutsideDetails} from '../visuals/outside-details.js';
 
 const clamp = Phaser.Math.Clamp;
 const lerp = Phaser.Math.Linear;
@@ -37,17 +40,27 @@ export default class OutsideScene extends Phaser.Scene {
     // Edit PLAYER.spawn in constants.js to move the arrival point by the company entrance.
     this.shadow = this.add.ellipse(PLAYER.spawn.x, PLAYER.spawn.y - 1, 13, 5, 0x102e2f, 0.28).setDepth(2);
     this.player = this.physics.add.sprite(PLAYER.spawn.x, PLAYER.spawn.y, 'intern-down-0');
-    this.player.setOrigin(0.5, 1).setDepth(3).setCollideWorldBounds(true);
+    this.player.setOrigin(0.5, 1).setDepth(20).setCollideWorldBounds(true);
     // Only the character's feet collide, which is natural for a top-down world.
     this.player.body.setSize(8, 6).setOffset(4, 18);
     this.player.body.setMaxVelocity(PLAYER.speed, PLAYER.speed);
+    // Static map collisions are swept through a compact grid, with one player
+    // body rather than a thousand immovable bodies. Traffic uses no bodies.
+    this.player.body.moves = false;
     this.createObstacles();
     this.createEntranceMarker();
+    addOutsideDetails(this);
 
     this.cursors = this.input.keyboard.createCursorKeys();
     this.wasd = this.input.keyboard.addKeys('W,A,S,D');
     this.input.keyboard.addCapture(['UP', 'DOWN', 'LEFT', 'RIGHT', 'W', 'A', 'S', 'D']);
     this.touchControls = new TouchControls();
+    this.traffic = new TrafficManager(this);
+    this.busEvent = new Bus163Event(this,this.traffic);
+    this.trafficWarning = this.add.text(0,0,'!',{
+      fontFamily:'sans-serif',fontSize:'17px',fontStyle:'bold',color:'#6b4826',
+      backgroundColor:'#fff2be',padding:{x:5,y:1},
+    }).setOrigin(.5,1).setDepth(30).setVisible(false);
 
     // The transition is drawn by an independent screen-space camera. Its circular
     // opening stays perfectly round while the world camera is zoomed or resized.
@@ -207,17 +220,6 @@ export default class OutsideScene extends Phaser.Scene {
 
   createObstacles() {
     this.collisionLayer = new CollisionLayer(OUTSIDE_OBJECTS, this.worldWidth, this.worldHeight, COLLISION_CELL_SIZE);
-    this.obstacles = this.physics.add.staticGroup();
-    for (const rectangle of this.collisionLayer.rectangles) {
-      const zone = this.add.zone(
-        rectangle.x + rectangle.width / 2,
-        rectangle.y + rectangle.height / 2,
-        rectangle.width,
-        rectangle.height,
-      );
-      this.obstacles.add(zone);
-    }
-    this.physics.add.collider(this.player, this.obstacles);
     // Inspect the semantic object boundaries with ?debug=1&collisions=1.
     const query = new URLSearchParams(location.search);
     if (DEBUG.collisions || (query.has('debug') && query.has('collisions'))) {
@@ -295,12 +297,15 @@ export default class OutsideScene extends Phaser.Scene {
     }
   }
 
+  setPlayerControl(enabled) {
+    this.controlsEnabled=enabled;
+    this.player?.setVelocity(0,0);
+    this.input.keyboard.resetKeys();
+    this.touchControls?.setEnabled(enabled);
+  }
+
   update(time, delta) {
     if (!this.player) return;
-    if (!this.controlsEnabled) {
-      this.player.setVelocity(0, 0);
-      return;
-    }
     let x = Number(this.cursors.right.isDown || this.wasd.D.isDown)
       - Number(this.cursors.left.isDown || this.wasd.A.isDown);
     let y = Number(this.cursors.down.isDown || this.wasd.S.isDown)
@@ -312,8 +317,21 @@ export default class OutsideScene extends Phaser.Scene {
     // Normalize diagonal movement so it never travels faster than one direction.
     const magnitude = Math.hypot(x, y);
     if (magnitude > 1) { x /= magnitude; y /= magnitude; }
-    this.player.setVelocity(x * PLAYER.speed, y * PLAYER.speed);
-    if (magnitude > 0) {
+    if(!this.controlsEnabled) {x=0;y=0;}
+    const intent={x:x*PLAYER.speed,y:y*PLAYER.speed};
+    this.traffic.update(delta,this.player,intent);
+    const before={x:this.player.x,y:this.player.y};
+    if(this.controlsEnabled) {
+      const dt=Math.min(delta,60)/1000;
+      const position=this.collisionLayer.moveFeet(before.x,before.y,intent.x*dt,intent.y*dt,
+        (nx,ny,oldX,oldY)=>this.traffic.canPlayerEnter(nx,ny,oldX,oldY));
+        this.player.setPosition(position.x,position.y);
+        this.player.body.updateFromGameObject();
+    }
+    const distanceMoved=Math.hypot(this.player.x-before.x,this.player.y-before.y);
+    this.busEvent.update(delta);
+    this.trafficWarning.setPosition(this.player.x,this.player.y-29).setVisible(this.traffic.hazard && this.phase==='playing');
+    if (distanceMoved > .01) {
       if (Math.abs(x) > Math.abs(y)) this.facing = x < 0 ? 'left' : 'right';
       else this.facing = y < 0 ? 'up' : 'down';
       this.walkClock += delta;
@@ -326,7 +344,6 @@ export default class OutsideScene extends Phaser.Scene {
     this.shadow.setPosition(this.player.x, this.player.y - 1);
     // Audio remains an optional hook. Emit only for actual displacement, so
     // pushing against a building or the world boundary never produces steps.
-    const distanceMoved = this.player.body.deltaAbsX() + this.player.body.deltaAbsY();
     if (magnitude > 0 && distanceMoved > 0.1 && time - this.lastFootstepAt >= 300) {
       this.lastFootstepAt = time;
       window.dispatchEvent(new CustomEvent('remember:footstep', {
@@ -341,6 +358,8 @@ export default class OutsideScene extends Phaser.Scene {
     window.removeEventListener('blur', this.onBlur);
     document.removeEventListener('visibilitychange', this.onVisibilityChange);
     this.touchControls?.destroy();
+    this.busEvent?.destroy();
+    this.traffic?.destroy();
     this.hud?.setAttribute('hidden', '');
     this.revealOverlay?.clearMask();
     this.circleMask?.destroy();

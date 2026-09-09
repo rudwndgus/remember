@@ -1,3 +1,6 @@
+import { OUTSIDE_LOCATIONS } from '../data/outside-locations.js';
+import { SIGNAL_LOCATIONS } from '../data/traffic.js';
+
 /**
  * Hand-traced object layer for the ORIGINAL 1619 × 971 outside-main-map.png.
  * Coordinates are native image pixels. The background itself is never edited.
@@ -28,6 +31,9 @@ export const COLLISION_COLORS = {
 };
 
 export const OUTSIDE_OBJECTS = [
+  box('bus-stop-bench','equipment',OUTSIDE_LOCATIONS.busStopBench.x-6,OUTSIDE_LOCATIONS.busStopBench.y-15,13,30),
+  box('bus-stop-sign-post','pole',OUTSIDE_LOCATIONS.busStopSign.x-2,OUTSIDE_LOCATIONS.busStopSign.y,4,20),
+  ...SIGNAL_LOCATIONS.map((signal,i)=>box(`traffic-signal-post-${i}`,'pole',signal.x-2,signal.y+18,5,12)),
   // NORTH / WEST: buildings and the enclosed strip west of the main road.
   polygon('west-edge-building', 'building', [[0,241],[57,241],[57,295],[64,295],[64,466],[0,466]]),
   box('northwest-office', 'building', 383, 39, 186, 116),
@@ -114,7 +120,8 @@ export const OUTSIDE_OBJECTS = [
   // Tree canopies protruding beyond their planted strip, plus connected woods.
   polygon('northwest-woods', 'vegetation', [[0,0],[116,0],[119,72],[105,95],[100,154],[112,169],[116,221],[100,232],[0,233]]),
   polygon('west-building-garden', 'vegetation', [[107,295],[126,295],[127,481],[66,483],[58,463],[63,401],[77,379],[88,369],[100,338]]),
-  polygon('southwest-woods', 'vegetation', [[0,593],[67,593],[89,609],[117,613],[126,637],[121,680],[130,698],[128,818],[110,837],[103,883],[121,904],[125,971],[0,971]]),
+  // Preserve the existing paved bus-stop recess inside the reference red area.
+  polygon('southwest-woods', 'vegetation', [[0,593],[67,593],[89,609],[117,613],[126,637],[121,680],[130,698],[128,772],[94,772],[94,883],[121,904],[125,971],[0,971]]),
   polygon('company-west-trees', 'vegetation', [[1135,89],[1151,99],[1158,129],[1157,203],[1162,224],[1157,274],[1145,299],[1149,362],[1136,400],[1139,437],[1103,438],[1094,411],[1098,368],[1093,343],[1099,289],[1092,256],[1098,218],[1097,183],[1106,159],[1108,127],[1123,115],[1126,98]]),
   polygon('company-east-trees', 'vegetation', [[1554,298],[1578,308],[1591,331],[1596,376],[1604,408],[1594,447],[1575,438],[1555,414]]),
   polygon('northeast-woods', 'vegetation', [[1440,0],[1619,0],[1619,166],[1605,153],[1586,141],[1568,119],[1544,99],[1521,77],[1497,58],[1470,32]]),
