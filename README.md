@@ -1,5 +1,13 @@
 # remember
 
+**주차장 입구 업데이트:** 회사 왼쪽 입구로 걸어 들어가면 0.88초의 짧은 줌·따뜻한 회색 페이드로 주차장에 연결됩니다. 하단 중앙에서 위쪽을 바라보며 한 걸음 들어온 뒤 키보드·터치 이동이 복구됩니다. [웹앱 바로 실행](https://rudwndgus.github.io/remember/)
+
+입구와 스폰 조정: `src/data/parking-garage.js`의 `companyEntranceTrigger`, `parkingGarageSpawnX`, `parkingGarageSpawnY`. 전환 시간·색상은 같은 파일의 `GARAGE_TRANSITION`에서 변경합니다. 주차장 차량·벽·화단·중앙 건물은 기존 충돌 격자를 사용합니다. 상단 다시 보기 버튼으로 인트로로 돌아갈 수 있습니다.
+
+주차장 아트는 `public/assets/maps/parking-garage-map.png`에 저장했습니다. Built-in imagegen 편집으로 첨부 원본의 1448×1086 배치를 유지하며 야외 지도의 따뜻한 회색·벽돌·올리브색과 픽셀 질감에 맞췄습니다. 사용한 프롬프트 요지: “Preserve the exact parking-garage layout, perspective and objects; subtly match the outside map's muted warm-gray asphalt, weathered tan paving, brick, olive foliage and fine pixel shading; no characters, annotations or UI.” 첨부 원본과 입구 표시 이미지는 `references/parking-garage-original.png`, `references/company-entrance-reference.png`에 보관하며 게임에서는 표시하지 않습니다.
+
+검증: `tests/garage.spec.js`에서 실제 시작점부터 입구까지 걷기, 전환 시간·입력 잠금·스폰 방향, 키보드/모바일 조작 복구, 인트로 재시작을 확인합니다.
+
 ## [🎮 웹앱 바로 실행하기](https://rudwndgus.github.io/remember/)
 
 설치 없이 휴대폰이나 PC 브라우저에서 바로 플레이할 수 있습니다.

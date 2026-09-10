@@ -9,6 +9,7 @@ export default class BootScene extends Phaser.Scene {
     this.load.on('loaderror', (file) => this.failedAssets.push(file.key));
     this.load.image('bluu-logo', ASSETS.logo);
     this.load.image('outside-map', ASSETS.map);
+    this.load.image('parking-garage-map', ASSETS.parkingGarage);
   }
 
   create() {
@@ -22,7 +23,7 @@ export default class BootScene extends Phaser.Scene {
       const list = document.querySelector('#missing-assets');
       list.replaceChildren(...this.failedAssets.map((key) => {
         const li = document.createElement('li');
-        li.textContent = key === 'bluu-logo' ? 'public/assets/ui/bluu-logo.png' : 'public/assets/maps/outside-main-map.png';
+        li.textContent = key === 'bluu-logo' ? 'public/assets/ui/bluu-logo.png' : key === 'parking-garage-map' ? 'public/assets/maps/parking-garage-map.png' : 'public/assets/maps/outside-main-map.png';
         return li;
       }));
       return;

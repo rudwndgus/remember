@@ -4,6 +4,7 @@ import TitleScene from '../scenes/TitleScene.js';
 import OutsideScene from '../scenes/OutsideScene.js';
 import BusBoardingScene from '../scenes/BusBoardingScene.js';
 import BusInteriorScene from '../scenes/BusInteriorScene.js';
+import ParkingGarageScene from '../scenes/ParkingGarageScene.js';
 import { COLORS } from '../utils/constants.js';
 
 const diagnostics = new URLSearchParams(window.location.search);
@@ -18,5 +19,5 @@ export const gameConfig = {
   physics: { default: 'arcade', arcade: { debug: false } },
   input: { activePointers: 3 },
   audio: { noAudio: true },
-  scene: [BootScene, TitleScene, OutsideScene, BusBoardingScene, BusInteriorScene],
+  scene: [BootScene, TitleScene, OutsideScene, BusBoardingScene, BusInteriorScene, ParkingGarageScene],
 };

@@ -23,7 +23,7 @@ const viewportObserver = new ResizeObserver(([entry]) => {
 viewportObserver.observe(document.querySelector('#game'));
 
 const phaseListener = ({ detail: { phase } }) => {
-  pwa.setIntroActive(!['title', 'playing', 'on-bus'].includes(phase));
+  pwa.setIntroActive(!['title', 'playing', 'on-bus', 'garage-playing'].includes(phase));
   if (phase === 'logo-focus') window.dispatchEvent(new Event('remember:start'));
   const descriptions = {
     title: 'Tap to start your memory.',
@@ -35,12 +35,20 @@ const phaseListener = ({ detail: { phase } }) => {
     boarding: 'Boarding NJ Transit Bus 163.',
     'on-bus': 'You are on Bus 163. Choose your next stop from your bus seat, or get off at the bus stop.',
     alighting: 'Returning to the bus stop.',
+    'garage-entering': 'Entering the company parking garage.',
+    'garage-arrival': 'Arriving inside the parking garage.',
+    'garage-playing': 'Inside the company parking garage. Use arrow keys, WASD, or the touch joystick to walk.',
   };
   if (descriptions[phase]) document.querySelector('#live-status').textContent = descriptions[phase];
 };
 window.addEventListener('remember:phase', phaseListener);
 document.querySelector('#retry-assets').addEventListener('click', () => window.location.reload());
 document.querySelector('#replay-intro').addEventListener('click', () => {
+  if (game.scene.isActive('ParkingGarageScene')) {
+    game.scene.stop('ParkingGarageScene');
+    game.scene.start('TitleScene');
+    return;
+  }
   if (!game.scene.isActive('OutsideScene')) return;
   game.scene.stop('OutsideScene');
   game.scene.start('TitleScene');

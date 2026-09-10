@@ -1,6 +1,7 @@
 export const ASSETS = {
   logo: `${import.meta.env.BASE_URL}assets/ui/bluu-logo.png`,
   map: `${import.meta.env.BASE_URL}assets/maps/outside-main-map.png`,
+  parkingGarage: `${import.meta.env.BASE_URL}assets/maps/parking-garage-map.png`,
 };
 
 export const COLORS = { blue: 0x084c94, white: 0xfffff9, ink: 0x162921 };
