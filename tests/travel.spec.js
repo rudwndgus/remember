@@ -64,6 +64,8 @@ test('walk, wait, Bus 163 approach, manual boarding, phone and return',async({pa
   await expect(page.locator('.memory-phone')).toHaveCount(0);
   await expect(page.locator('.seat-dialogue h1')).toHaveText('어디로 갈까?');
   const travel=Number(await page.locator('.pixel-bus-cabin').getAttribute('data-travel'));
+  await expect(page.locator('.pixel-bus-cabin')).toHaveAttribute('data-asset','interior-hudson.png');
+  const bob=await page.locator('.pixel-bus-cabin').getAttribute('data-bob');
   for(const id of ['new-york','memories']) {
     const button=page.locator(`[data-destination="${id}"]`);
     if(isMobile) await button.tap();else await button.click();
@@ -73,6 +75,22 @@ test('walk, wait, Bus 163 approach, manual boarding, phone and return',async({pa
   await page.screenshot({path:`artifacts/interior-${isMobile?'mobile':'desktop'}.png`});
   await page.waitForTimeout(400);
   expect(Number(await page.locator('.pixel-bus-cabin').getAttribute('data-travel'))).toBeGreaterThan(travel);
+  expect(await page.locator('.pixel-bus-cabin').getAttribute('data-bob')).not.toBe(bob);
+  const layers=await page.evaluate(()=>{
+    const s=window.__REMEMBER_GAME__.scene.getScene('BusInteriorScene'),c=s.cabinContext,w=s.cabin.width,h=s.cabin.height;
+    s.update(10000,0);const before=c.getImageData(0,0,w,h).data;
+    s.travelPixels+=40;s.update(10000,0);const after=c.getImageData(0,0,w,h).data;
+    let changed=0;for(let i=0;i<before.length;i+=4)if(before[i]!==after[i]||before[i+1]!==after[i+1]||before[i+2]!==after[i+2])changed++;
+    // Hold the cabin shake fixed and sample the passenger's head in image space.
+    const portrait=h>w,artHeight=portrait?h*.73:h,zoom=Math.max(w/1448,artHeight/1086)*1.016;
+    const angle=Math.sin(17)*.0012,dx=400-724,dy=540-543;
+    const x=Math.round((w-1448*zoom)*(portrait?.24:.5)+724*zoom+Math.sin(14)*1.7+zoom*(dx*Math.cos(angle)-dy*Math.sin(angle)));
+    const y=Math.round((artHeight-1086*zoom)*.45+543*zoom+Math.sin(21)*2.3+Math.sin(71)*.65+zoom*(dx*Math.sin(angle)+dy*Math.cos(angle)));
+    const index=(y*w+x)*4;
+    return {changed,passengerBefore:[...before.slice(index,index+4)],passengerAfter:[...after.slice(index,index+4)]};
+  });
+  expect(layers.changed).toBeGreaterThan(500);
+  expect(layers.passengerAfter).toEqual(layers.passengerBefore);
   if(isMobile){await page.setViewportSize({width:844,height:390});await page.locator('.get-off-bus').scrollIntoViewIfNeeded();await expect(page.locator('.get-off-bus')).toBeInViewport();}
   await page.locator('.get-off-bus').click();
   await expect(page.locator('body')).toHaveAttribute('data-phase','playing');

@@ -31,3 +31,11 @@
 .bus-cue,.board-bus,.bus-route-pill{border-radius:0}.board-bus{border:2px solid #516c5d;box-shadow:4px 4px #20372da0}
 @media(max-width:600px){.seat-dialogue{left:5%;right:auto;width:90%;bottom:max(18px,env(safe-area-inset-bottom));max-height:43%;padding:14px}.seat-heading{top:max(28px,env(safe-area-inset-top))}.seat-dialogue h1{font-size:22px}.seat-intro{font-size:10px;margin-bottom:10px}.bus-interior .destination-button{min-height:54px}.bus-boarding .boarding-heading{max-width:86%;top:4%}.bus-boarding .boarding-heading .eyebrow{font-size:7px}}
 @media(max-height:540px){.seat-dialogue{left:auto;right:3%;width:340px;max-width:46%;max-height:88%;bottom:5%;padding:12px}.seat-heading{left:23%;top:7%}.seat-heading p{font-size:10px}.seat-dialogue h1{font-size:20px}.seat-intro{font-size:10px}.bus-boarding .boarding-heading{max-width:48%}}
+/* The supplied Hudson illustration is the cabin; controls remain steady above it. */
+.bus-interior .seat-heading{display:none}
+.bus-interior .seat-dialogue{background:#172033ee;color:#eee3c9;border-color:#596783;outline-color:#111827;box-shadow:5px 5px #080e1bd9}
+.bus-interior .seat-route{color:#e5bc65}.bus-interior .seat-intro{color:#b9bfd0}
+.bus-interior .destination-button{background:#253450;color:#f0e6ce;border-color:#586887;box-shadow:3px 3px #0c1525}
+.bus-interior .destination-button small{color:#b7c2d4}.bus-interior .destination-icon{background:#172942;color:#e3bd6c;border-color:#60728c}
+.bus-interior .destination-button[aria-pressed=true]{background:#384c69;border-color:#e4b75e;box-shadow:3px 3px #101a2b}
+.bus-interior .destination-preview{border-color:#dfab53}.bus-interior .destination-preview p{color:#d0d6df}.bus-interior .get-off-bus{border-color:#526079;color:#e5d5b2}

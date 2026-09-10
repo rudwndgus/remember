@@ -5,6 +5,9 @@ import {emitAudioCue} from '../audio/hooks.js';
 
 export default class BusInteriorScene extends Phaser.Scene {
   constructor(){super('BusInteriorScene');}
+  preload() {
+    if(!this.textures.exists('bus-hudson-interior')) this.load.image('bus-hudson-interior',`${import.meta.env.BASE_URL}assets/bus/interior-hudson.png`);
+  }
   create({outsideKey='OutsideScene'}={}) {
     this.outsideKey=outsideKey;this.ready=false;this.leaving=false;this.selectedDestination=null;
     this.element=document.createElement('section');this.element.className='bus-interior';this.element.style.opacity=0;
@@ -33,68 +36,59 @@ export default class BusInteriorScene extends Phaser.Scene {
   }
   createCabin() {
     this.cabin=this.element.querySelector('canvas');this.cabinContext=this.cabin.getContext('2d');
+    this.cabinImage=this.textures.get('bus-hudson-interior').getSourceImage();
     this.travelPixels=0;
-    this.scenery=document.createElement('canvas');this.scenery.width=512;this.scenery.height=96;
-    const c=this.scenery.getContext('2d'),rect=(color,x,y,w,h)=>{c.fillStyle=color;c.fillRect(x,y,w,h);};
-    rect('#a6bab0',0,0,512,96);rect('#c8ccae',0,38,512,58);
-    for(let x=0;x<512;x+=17){rect('#718363',x,29+(x%11),18,29);rect('#87936c',x+3,27+(x%11),10,18);}
-    for(let x=16;x<512;x+=83){
-      rect('#53645a',x+2,39,51,40);rect('#a59776',x,42,48,34);rect('#6a6653',x-2,39,52,4);
-      rect('#ccc09a',x+1,43,46,2);
-      for(let y=47;y<72;y+=9)for(let k=4;k<44;k+=9){rect('#3f5756',x+k,y,5,6);rect('#8caaa1',x+k,y,4,1);}
-      for(let y=47;y<74;y+=4)rect('#8a8067',x,y,48,1);
-    }
-    for(let x=0;x<512;x+=37){
-      rect('#5a6048',x+9,51,3,30);
-      for(let k=0;k<7;k++){const y=38+(k*7)%22;rect(['#405c43','#637b4b','#849158'][k%3],x+(k*11)%16,y,12,10);}
-      for(let k=0;k<30;k++)rect(k%2?'#99a168':'#526d44',x+(k*7)%26,39+(k*11)%30,2,1);
-    }
-    rect('#bbb391',0,81,512,5);rect('#777e75',0,86,512,10);
-    for(let x=0;x<512;x+=32)rect('#d4cbb0',x,91,15,1);
+    // Glass only: the passenger, seat backs, poles and mirror stay in the cabin.
+    this.windows=[
+      [[0,76],[44,105],[44,748],[0,748]],
+      [[210,141],[744,319],[744,594],[707,606],[680,619],[626,639],[576,655],[550,659],[532,646],[499,631],[478,621],[472,601],[481,564],[476,519],[455,487],[430,471],[398,450],[350,440],[307,447],[279,467],[263,502],[268,548],[281,578],[288,617],[290,637],[263,642],[210,681]],
+      [[797,261],[823,280],[823,325],[797,316]],
+      [[797,340],[823,347],[823,572],[797,583]],
+      [[1059,305],[1160,305],[1160,360],[1198,360],[1198,500],[1078,500],[1059,478]],
+      [[1225,361],[1278,361],[1278,308],[1293,308],[1293,499],[1225,499]],
+      [[1336,289],[1365,282],[1365,491],[1336,494]],
+    ];
+    // Reuse the supplied skyline and Hudson pixels, filling only the scenery
+    // hidden behind the original passenger so panning never drags them outside.
+    const strip=document.createElement('canvas');strip.width=540;strip.height=558;
+    const c=strip.getContext('2d');c.imageSmoothingEnabled=false;
+    c.fillStyle='#79b6ef';c.fillRect(0,0,540,558);
+    c.save();c.beginPath();c.moveTo(0,7);c.lineTo(538,185);c.lineTo(538,558);c.lineTo(0,558);c.closePath();c.clip();
+    c.drawImage(this.cabinImage,208,134,540,558,0,0,540,558);c.restore();
+    // Clean, unobstructed facade and water samples from the same illustration.
+    c.drawImage(this.cabinImage,550,320,192,184,48,186,240,184);
+    c.drawImage(this.cabinImage,485,504,257,102,48,370,240,102);
+    for(let x=0;x<540;x+=160)c.drawImage(this.cabinImage,485,606,160,31,x,472,160,86);
+    this.scenery=document.createElement('canvas');this.scenery.width=1080;this.scenery.height=558;
+    const p=this.scenery.getContext('2d');p.imageSmoothingEnabled=false;p.drawImage(strip,0,0);
+    p.translate(1080,0);p.scale(-1,1);p.drawImage(strip,0,0);
+    this.cabin.dataset.asset='interior-hudson.png';
   }
   update(time,delta) {
-    if(!this.cabin) return;
-    // Low-resolution drawing and integer scrolling keep every scene pixel sharp.
-    const w=Math.max(192,Math.round(this.scale.width/4)),h=Math.round(w*this.scale.height/this.scale.width);
+    if(!this.cabinImage) return;
+    const w=Math.round(this.scale.width),h=Math.round(this.scale.height);
     if(this.cabin.width!==w||this.cabin.height!==h){this.cabin.width=w;this.cabin.height=h;}
     const c=this.cabinContext;c.imageSmoothingEnabled=false;
-    this.travelPixels+=Math.min(delta,60)*.022;
+    this.travelPixels+=Math.min(delta,60)*.009;
     this.cabin.dataset.travel=String(Math.floor(this.travelPixels));
-    const rect=(color,x,y,width,height)=>{c.fillStyle=color;c.fillRect(Math.round(x),Math.round(y),Math.round(width),Math.round(height));};
-    const poly=(color,points)=>{c.fillStyle=color;c.beginPath();points.forEach(([x,y],i)=>i?c.lineTo(Math.round(x),Math.round(y)):c.moveTo(Math.round(x),Math.round(y)));c.closePath();c.fill();};
-    const portrait=h>w,top=h*.18,bottom=h*(portrait?.48:.62);
-    rect('#737e75',0,0,w,h);poly('#abae97',[[0,0],[w,0],[w*.65,top],[w*.35,top]]);
-    for(let x=0;x<w;x+=w/7){poly('#878f7d',[[x,0],[x+2,0],[w*.5+(x-w*.5)*.3,top],[w*.5+(x-w*.5)*.3-1,top]]);}
-    rect('#d4ceb0',w*.33,top-4,w*.34,2);rect('#56665d',w*.32,top,w*.36,h);
-    // Both windows share continuous town scenery; choosing an option never pauses it.
-    for(const right of [false,true]){
-      const points=right?[[w*.69,top+6],[w,top-8],[w,bottom],[w*.69,bottom-18]]:[[0,top-8],[w*.31,top+6],[w*.31,bottom-18],[0,bottom]];
-      poly('#293f3d',points);c.save();c.beginPath();
-      const inner=right?[[w*.71,top+9],[w,top-4],[w,bottom-5],[w*.71,bottom-21]]:[[0,top-4],[w*.29,top+9],[w*.29,bottom-21],[0,bottom-5]];
-      inner.forEach(([x,y],i)=>i?c.lineTo(Math.round(x),Math.round(y)):c.moveTo(Math.round(x),Math.round(y)));c.closePath();c.clip();
-      const offset=Math.floor(this.travelPixels+(right?180:0))%512;
-      for(let x=-offset-512;x<w;x+=512)c.drawImage(this.scenery,x,Math.round(top-5),512,Math.round(bottom-top));
-      c.restore();
-      const rail=right?w*.85:w*.14;rect('#778779',rail,top,2,bottom-top-7);rect('#b8bba0',rail,top,1,bottom-top-7);
+    const portrait=h>w,artHeight=portrait?h*.73:h;
+    const zoom=Math.max(w/1448,artHeight/1086)*1.016;
+    const x=(w-1448*zoom)*(portrait?.24:.5),y=(artHeight-1086*zoom)*.45;
+    const bob=Math.sin(time*.0021)*2.3+Math.sin(time*.0071)*.65;
+    const sway=Math.sin(time*.0014)*1.7;
+    this.cabin.dataset.bob=bob.toFixed(2);
+    c.fillStyle='#111827';c.fillRect(0,0,w,h);c.save();
+    c.translate(x+724*zoom+sway,y+543*zoom+bob);c.rotate(Math.sin(time*.0017)*.0012);c.scale(zoom,zoom);c.translate(-724,-543);
+    c.drawImage(this.cabinImage,0,0,1448,1086);
+    c.save();c.beginPath();
+    for(const points of this.windows){points.forEach(([px,py],i)=>i?c.lineTo(px,py):c.moveTo(px,py));c.closePath();}
+    c.clip();
+    // Slow skyline, flowing water, faster roadside rail: continuous parallax.
+    for(const [sourceY,height,speed] of [[0,370,.55],[370,102,1.15],[472,86,2.4]]){
+      const offset=Math.floor(this.travelPixels*speed)%1080;
+      for(let tile=-1;tile<3;tile++)c.drawImage(this.scenery,0,sourceY,1080,height,208-offset+tile*1080,134+sourceY,1080,height);
     }
-    poly('#3c514e',[[w*.4,top+23],[w*.6,top+23],[w*.75,h],[w*.25,h]]);
-    for(let y=top+40;y<h;y+=8)rect('#475c56',w*.4,y,w*.2,1);
-    const seat=(x,y,sw,sh)=>{
-      rect('#283c3d',x-3,y+3,sw+6,sh);rect('#a7ae98',x,y,sw,2);rect('#456968',x,y+3,sw,sh);
-      rect('#718981',x+2,y+4,sw-4,3);rect('#344f52',x+sw-3,y+5,3,sh-2);
-      for(let sy=10;sy<sh-3;sy+=4)for(let sx=3;sx<sw-4;sx+=5){rect('#5e7a71',x+sx,y+sy,2,1);rect('#344f50',x+sx+1,y+sy+1,1,1);}
-      rect('#283e3c',x+3,y+sh*.65,sw-6,2);rect('#b2b49b',x-5,y+sh*.73,5,3);rect('#8e9d8c',x+sw,y+sh*.73,5,3);
-    };
-    seat(w*.29,top+26,w*.13,h*.2);seat(w*.59,top+26,w*.13,h*.2);
-    seat(-3,bottom-5,w*.29,h*.46);seat(w*.75,bottom-5,w*.29,h*.46);
-    for(const x of [w*.26,w*.73]){rect('#354c46',x,0,3,h*.8);rect('#bec1a6',x+1,0,1,h*.8);}
-    // The player's lap and hands establish a seated view, with no phone.
-    const knees=h*(portrait?.52:.83);
-    for(const x of [w*.38,w*.53]){
-      rect('#263d46',x-2,knees+3,w*.1,h*.22);rect('#47636a',x,knees,w*.1,h*.23);
-      rect('#627974',x+2,knees+2,3,h*.19);rect('#bd906e',x-2,knees-4,w*.075,7);
-      rect('#e2ba8a',x-1,knees-5,w*.065,5);rect('#ebe0bd',x-3,knees-11,w*.08,7);
-    }
+    c.restore();c.restore();
   }
   setPhase(phase) {document.body.dataset.phase=phase;window.dispatchEvent(new CustomEvent('remember:phase',{detail:{phase}}));}
   selectDestination(destination) {
