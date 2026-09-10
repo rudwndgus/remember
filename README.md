@@ -1,10 +1,14 @@
 # remember
 
-**주차장 왕복 업데이트:** 회사 왼쪽 입구에서 약 1.76초의 완만한 줌·페이드로 주차장에 들어갑니다. 주차장 하단 도로로 나가면 같은 회사 입구 앞 야외로 돌아옵니다. 중앙 엘리베이터룸 앞 매트로 올라가면 실내로 들어가고, 실내 하단 중앙 문으로 내려오면 주차장으로 돌아옵니다. [웹앱 바로 실행](https://rudwndgus.github.io/remember/)
+**자동문·캐릭터 중심 디졸브:** 엘리베이터룸은 별도 장면 이동 없이 같은 지도에서 걸어 들어갑니다. 양쪽에서 다가가면 두 문짝이 자동으로 열리고, 통과 후 멀어지면 닫힙니다. 실내 바닥과 출입 통로가 연결되어 자유롭게 왕복할 수 있습니다.
+
+야외↔주차장은 캐릭터의 화면 위치를 고정하고 1.1초 동안 목적지 캐릭터 크기에 맞춰 확대·축소한 뒤, 캐릭터를 유지하면서 배경만 0.65초 디졸브합니다. 도착 직후에도 같은 화면 위치와 크기를 유지하며, 다시 걸을 때 카메라 추적이 부드럽게 복구됩니다. 이번 수정은 사용자 요청에 따라 테스트를 실행하지 않았습니다.
+
+**주차장 왕복:** 회사 왼쪽 입구에서 주차장에 들어갑니다. 주차장 하단 도로로 나가면 같은 회사 입구 앞 야외로 돌아옵니다. [웹앱 바로 실행](https://rudwndgus.github.io/remember/)
 
 주차장 캐릭터·발 충돌·이동 속도는 지도 차량 크기를 기준으로 2.7배 조정했습니다. 엘리베이터룸은 기존 주차장 그림의 실내 바닥·문·조명을 그대로 사용합니다. 왕복 시 도착 지점을 진입 판정 밖에 두고 입력을 초기화하여 바로 되돌아가는 현상을 방지합니다. 이번 왕복·비율 수정은 사용자 요청에 따라 테스트를 실행하지 않았습니다.
 
-입구와 스폰 조정: `src/data/parking-garage.js`의 `companyEntranceTrigger`, `parkingGarageSpawnX`, `parkingGarageSpawnY`. 전환 시간·색상은 같은 파일의 `GARAGE_TRANSITION`에서 변경합니다. 주차장 차량·벽·화단·중앙 건물은 기존 충돌 격자를 사용합니다. 상단 다시 보기 버튼으로 인트로로 돌아갈 수 있습니다.
+입구와 스폰 조정: `src/data/parking-garage.js`의 `companyEntranceTrigger`, `parkingGarageSpawnX`, `parkingGarageSpawnY`. 캐릭터 기준 디졸브는 `src/scenes/MapDissolveScene.js`, 자동문은 `ParkingGarageScene.js`에서 조정합니다. 주차장 차량·벽·화단은 기존 충돌 격자를 사용합니다. 상단 다시 보기 버튼으로 인트로로 돌아갈 수 있습니다.
 
 주차장 아트는 `public/assets/maps/parking-garage-map.png`에 저장했습니다. Built-in imagegen 편집으로 첨부 원본의 1448×1086 배치를 유지하며 야외 지도의 따뜻한 회색·벽돌·올리브색과 픽셀 질감에 맞췄습니다. 사용한 프롬프트 요지: “Preserve the exact parking-garage layout, perspective and objects; subtly match the outside map's muted warm-gray asphalt, weathered tan paving, brick, olive foliage and fine pixel shading; no characters, annotations or UI.” 첨부 원본과 입구 표시 이미지는 `references/parking-garage-original.png`, `references/company-entrance-reference.png`에 보관하며 게임에서는 표시하지 않습니다.
 

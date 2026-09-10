@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { startMapDissolve, anchorArrival, settleArrival, addMapSurround } from './MapDissolveScene.js';
 import TouchControls from '../ui/TouchControls.js';
 import { MAP, PLAYER, INTRO, CAMERA, DEBUG, COLORS } from '../utils/constants.js';
 import { OUTSIDE_OBJECTS, COLLISION_CELL_SIZE, COLLISION_COLORS } from '../maps/outside-collisions.js';
@@ -6,7 +7,7 @@ import CollisionLayer from '../maps/CollisionLayer.js';
 import TrafficManager from '../systems/TrafficManager.js';
 import Bus163Event from '../systems/Bus163Event.js';
 import {addOutsideDetails} from '../visuals/outside-details.js';
-import { companyEntranceTrigger, companyExitSpawn, GARAGE_TRANSITION } from '../data/parking-garage.js';
+import { companyEntranceTrigger, companyExitSpawn } from '../data/parking-garage.js';
 
 const clamp = Phaser.Math.Clamp;
 const lerp = Phaser.Math.Linear;
@@ -17,6 +18,8 @@ export default class OutsideScene extends Phaser.Scene {
   }
 
   create(data = {}) {
+    this.arrivalAnchor = null;
+    this.arrivalSettling = false;
     this.phase = 'reveal';
     this.controlsEnabled = false;
     this.revealProgress = { value: 0 };
@@ -32,6 +35,7 @@ export default class OutsideScene extends Phaser.Scene {
 
     // The original illustration stays a single image. Never stretch its aspect ratio.
     this.textures.get('outside-map').setFilter(Phaser.Textures.FilterMode.NEAREST);
+    addMapSurround(this);
     const mapImage = this.add.image(this.worldWidth / 2, this.worldHeight / 2, 'outside-map');
     const mapScale = Math.min(this.worldWidth / mapImage.width, this.worldHeight / mapImage.height);
     mapImage.setScale(mapScale).setDepth(0);
@@ -109,14 +113,11 @@ export default class OutsideScene extends Phaser.Scene {
       this.frameCamera(1);
       this.camera.setBounds(0, 0, this.worldWidth, this.worldHeight);
       this.camera.startFollow(this.player, true, .12, .12);
-      this.setPhase('garage-returning');
-      this.camera.fadeIn(GARAGE_TRANSITION.inMs, ...GARAGE_TRANSITION.color);
-      this.tweens.add({ targets: this.player, y: companyExitSpawn.y + GARAGE_TRANSITION.step,
-        duration: GARAGE_TRANSITION.inMs, ease: 'Sine.easeInOut', onComplete: () => {
-          this.setPlayerControl(true);
-          this.hud.hidden = false;
-          this.setPhase('playing');
-        } });
+      anchorArrival(this, data.travelAnchor);
+      this.player.setTexture('intern-down-0');
+      this.setPlayerControl(true);
+      this.hud.hidden = false;
+      this.setPhase('playing');
       return;
     }
 
@@ -232,7 +233,8 @@ export default class OutsideScene extends Phaser.Scene {
     if (['garage-entering', 'garage-returning'].includes(this.phase)) return;
     if (this.phase === 'playing') {
       this.camera.setZoom(this.getCameraViews().playZoom);
-      this.camera.setBounds(0, 0, this.worldWidth, this.worldHeight);
+      if (this.arrivalAnchor) anchorArrival(this, this.arrivalAnchor);
+      else this.camera.setBounds(0, 0, this.worldWidth, this.worldHeight);
     } else {
       this.frameCamera(this.phase === 'arrival' ? this.arrivalProgress.value : 0);
     }
@@ -331,11 +333,7 @@ export default class OutsideScene extends Phaser.Scene {
     this.setPhase('garage-entering');
     this.hud.hidden = true;
     this.facing = 'up';
-    const end = this.collisionLayer.moveFeet(this.player.x, this.player.y, 0, -GARAGE_TRANSITION.step);
-    this.tweens.add({ targets: this.player, y: end.y, duration: GARAGE_TRANSITION.outMs, ease: 'Sine.easeOut' });
-    this.camera.zoomTo(this.camera.zoom * GARAGE_TRANSITION.push, GARAGE_TRANSITION.outMs, 'Sine.easeInOut');
-    this.time.delayedCall(GARAGE_TRANSITION.leadMs, () => this.camera.fadeOut(GARAGE_TRANSITION.outMs, ...GARAGE_TRANSITION.color));
-    this.camera.once('camerafadeoutcomplete', () => this.scene.start('ParkingGarageScene'));
+    startMapDissolve(this, true);
   }
 
   update(time, delta) {
@@ -371,6 +369,7 @@ export default class OutsideScene extends Phaser.Scene {
     this.busEvent.update(delta);
     this.trafficWarning.setPosition(this.player.x,this.player.y-29).setVisible(this.traffic.hazard && this.phase==='playing');
     if (distanceMoved > .01) {
+      settleArrival(this, MAP);
       if (Math.abs(x) > Math.abs(y)) this.facing = x < 0 ? 'left' : 'right';
       else this.facing = y < 0 ? 'up' : 'down';
       this.walkClock += delta;

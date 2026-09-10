@@ -23,9 +23,7 @@ test('company entrance walks smoothly into garage and restores movement', async 
   await walk('ArrowLeft', 'x', 1208, true);
   await page.keyboard.down('ArrowUp');
   await expect(page.locator('body')).toHaveAttribute('data-phase', 'garage-entering');
-  expect(await page.evaluate(() => window.__REMEMBER_GAME__.scene.getScene('OutsideScene').controlsEnabled)).toBe(false);
-  await expect(page.locator('body')).toHaveAttribute('data-phase', 'garage-arrival');
-  expect(await page.evaluate(() => window.__REMEMBER_GAME__.scene.getScene('ParkingGarageScene').controlsEnabled)).toBe(false);
+  expect(await page.evaluate(() => window.__REMEMBER_GAME__.scene.isActive('MapDissolveScene'))).toBe(true);
   await page.keyboard.up('ArrowUp');
   await expect(page.locator('body')).toHaveAttribute('data-phase', 'garage-playing');
   const state = await page.evaluate(() => {
@@ -34,16 +32,16 @@ test('company entrance walks smoothly into garage and restores movement', async 
     return { x: s.player.x, y: s.player.y, facing: s.facing, controls: s.controlsEnabled,
       elapsed: phases.find(p => p.phase === 'garage-playing').at - phases.find(p => p.phase === 'garage-entering').at,
       blocked: s.collisionLayer.overlaps(s.player.x - 4, s.player.y - 6, 8, 6),
-      fadeColor: [s.camera.fadeEffect.red, s.camera.fadeEffect.green, s.camera.fadeEffect.blue] };
+      scale: s.player.scaleX };
   });
   expect(state.x).toBe(724);
-  expect(state.y).toBeCloseTo(984);
+  expect(state.y).toBeCloseTo(994);
   expect(state.facing).toBe('up');
   expect(state.controls).toBe(true);
   expect(state.blocked).toBe(false);
   expect(state.elapsed).toBeGreaterThan(1500);
   expect(state.elapsed).toBeLessThan(2300);
-  expect(state.fadeColor).toEqual([184, 181, 163]);
+  expect(state.scale).toBe(2.7);
   await page.screenshot({ path: `artifacts/garage-${testInfo.project.name}.png` });
   if (testInfo.project.name === 'mobile') {
     await page.locator('[data-direction="up"]').dispatchEvent('pointerdown', { pointerId: 1 });

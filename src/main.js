@@ -23,7 +23,7 @@ const viewportObserver = new ResizeObserver(([entry]) => {
 viewportObserver.observe(document.querySelector('#game'));
 
 const phaseListener = ({ detail: { phase } }) => {
-  pwa.setIntroActive(!['title', 'playing', 'on-bus', 'garage-playing', 'elevator-playing'].includes(phase));
+  pwa.setIntroActive(!['title', 'playing', 'on-bus', 'garage-playing'].includes(phase));
   if (phase === 'logo-focus') window.dispatchEvent(new Event('remember:start'));
   const descriptions = {
     title: 'Tap to start your memory.',
@@ -37,7 +37,6 @@ const phaseListener = ({ detail: { phase } }) => {
     alighting: 'Returning to the bus stop.',
     'garage-entering': 'Entering the company parking garage.',
     'garage-arrival': 'Arriving inside the parking garage.',
-    'elevator-playing': 'Inside the elevator lobby. Walk back through the bottom door to return to the garage.',
     'garage-returning': 'Walking back outside the company entrance.',
     'garage-playing': 'Inside the company parking garage. Use arrow keys, WASD, or the touch joystick to walk.',
   };
@@ -46,11 +45,6 @@ const phaseListener = ({ detail: { phase } }) => {
 window.addEventListener('remember:phase', phaseListener);
 document.querySelector('#retry-assets').addEventListener('click', () => window.location.reload());
 document.querySelector('#replay-intro').addEventListener('click', () => {
-  if (game.scene.isActive('ElevatorRoomScene')) {
-    game.scene.stop('ElevatorRoomScene');
-    game.scene.start('TitleScene');
-    return;
-  }
   if (game.scene.isActive('ParkingGarageScene')) {
     game.scene.stop('ParkingGarageScene');
     game.scene.start('TitleScene');
