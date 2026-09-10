@@ -41,8 +41,8 @@ test('company entrance walks smoothly into garage and restores movement', async 
   expect(state.facing).toBe('up');
   expect(state.controls).toBe(true);
   expect(state.blocked).toBe(false);
-  expect(state.elapsed).toBeGreaterThan(500);
-  expect(state.elapsed).toBeLessThan(1200);
+  expect(state.elapsed).toBeGreaterThan(1500);
+  expect(state.elapsed).toBeLessThan(2300);
   expect(state.fadeColor).toEqual([184, 181, 163]);
   await page.screenshot({ path: `artifacts/garage-${testInfo.project.name}.png` });
   if (testInfo.project.name === 'mobile') {

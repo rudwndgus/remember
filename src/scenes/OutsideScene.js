@@ -6,7 +6,7 @@ import CollisionLayer from '../maps/CollisionLayer.js';
 import TrafficManager from '../systems/TrafficManager.js';
 import Bus163Event from '../systems/Bus163Event.js';
 import {addOutsideDetails} from '../visuals/outside-details.js';
-import { companyEntranceTrigger, GARAGE_TRANSITION } from '../data/parking-garage.js';
+import { companyEntranceTrigger, companyExitSpawn, GARAGE_TRANSITION } from '../data/parking-garage.js';
 
 const clamp = Phaser.Math.Clamp;
 const lerp = Phaser.Math.Linear;
@@ -16,7 +16,7 @@ export default class OutsideScene extends Phaser.Scene {
     super('OutsideScene');
   }
 
-  create() {
+  create(data = {}) {
     this.phase = 'reveal';
     this.controlsEnabled = false;
     this.revealProgress = { value: 0 };
@@ -100,6 +100,25 @@ export default class OutsideScene extends Phaser.Scene {
     this.onVisibilityChange = () => { if (document.hidden) this.onBlur(); };
     document.addEventListener('visibilitychange', this.onVisibilityChange);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, this.shutdown, this);
+
+    if (data.fromGarage) {
+      this.revealProgress.value = 1;
+      this.revealOverlay.setVisible(false);
+      this.player.setPosition(companyExitSpawn.x, companyExitSpawn.y);
+      this.facing = 'down';
+      this.frameCamera(1);
+      this.camera.setBounds(0, 0, this.worldWidth, this.worldHeight);
+      this.camera.startFollow(this.player, true, .12, .12);
+      this.setPhase('garage-returning');
+      this.camera.fadeIn(GARAGE_TRANSITION.inMs, ...GARAGE_TRANSITION.color);
+      this.tweens.add({ targets: this.player, y: companyExitSpawn.y + GARAGE_TRANSITION.step,
+        duration: GARAGE_TRANSITION.inMs, ease: 'Sine.easeInOut', onComplete: () => {
+          this.setPlayerControl(true);
+          this.hud.hidden = false;
+          this.setPhase('playing');
+        } });
+      return;
+    }
 
     this.tweens.add({
       targets: this.revealProgress,
@@ -210,7 +229,7 @@ export default class OutsideScene extends Phaser.Scene {
   resize() {
     this.camera.setSize(this.scale.width, this.scale.height);
     this.overlayCamera.setSize(this.scale.width, this.scale.height);
-    if (this.phase === 'garage-entering') return;
+    if (['garage-entering', 'garage-returning'].includes(this.phase)) return;
     if (this.phase === 'playing') {
       this.camera.setZoom(this.getCameraViews().playZoom);
       this.camera.setBounds(0, 0, this.worldWidth, this.worldHeight);
@@ -315,14 +334,14 @@ export default class OutsideScene extends Phaser.Scene {
     const end = this.collisionLayer.moveFeet(this.player.x, this.player.y, 0, -GARAGE_TRANSITION.step);
     this.tweens.add({ targets: this.player, y: end.y, duration: GARAGE_TRANSITION.outMs, ease: 'Sine.easeOut' });
     this.camera.zoomTo(this.camera.zoom * GARAGE_TRANSITION.push, GARAGE_TRANSITION.outMs, 'Sine.easeInOut');
-    this.camera.fadeOut(GARAGE_TRANSITION.outMs, ...GARAGE_TRANSITION.color);
+    this.time.delayedCall(GARAGE_TRANSITION.leadMs, () => this.camera.fadeOut(GARAGE_TRANSITION.outMs, ...GARAGE_TRANSITION.color));
     this.camera.once('camerafadeoutcomplete', () => this.scene.start('ParkingGarageScene'));
   }
 
   update(time, delta) {
     if (!this.player) return;
-    if (this.phase === 'garage-entering') {
-      this.player.setTexture(`intern-up-${Math.floor(time / 145) % 2 + 1}`);
+    if (['garage-entering', 'garage-returning'].includes(this.phase)) {
+      this.player.setTexture(`intern-${this.facing}-${Math.floor(time / 145) % 2 + 1}`);
       this.shadow.setPosition(this.player.x, this.player.y - 1);
       return;
     }

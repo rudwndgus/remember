@@ -3,7 +3,7 @@ export const companyEntranceTrigger = { x: 1195, y: 449, width: 42, height: 17 }
 export const PARKING_GARAGE = { width: 1448, height: 1086 };
 export const parkingGarageSpawnX = 724;
 export const parkingGarageSpawnY = 994;
-export const GARAGE_TRANSITION = { outMs: 420, inMs: 460, step: 10, push: 1.055, color: [184, 181, 163] };
+export const GARAGE_TRANSITION = { leadMs: 160, outMs: 760, inMs: 840, step: 10, push: 1.025, color: [184, 181, 163] };
 
 const box = (id, x, y, w, h) => ({ id, points: [[x,y],[x+w,y],[x+w,y+h],[x,y+h]] });
 export const GARAGE_OBSTACLES = [
@@ -17,3 +17,11 @@ export const GARAGE_OBSTACLES = [
   ...[312,425,542,710].map((y,i) => box(`west-car-${i}`, 57, y, 134, 96)),
   ...[310,425,542,660,780].map((y,i) => box(`east-car-${i}`, 1263, y, 133, 90)),
 ];
+
+// Garage cars are about 2.7 times the outdoor car length in native image pixels.
+export const GARAGE_PLAYER_SCALE = 2.7;
+export const garageExitTrigger = { x: 540, y: 1040, width: 370, height: 46 };
+export const elevatorRoomTrigger = { x: 678, y: 713, width: 104, height: 20 };
+export const garageDoorReturn = { x: 724, y: 754 };
+export const companyExitSpawn = { x: 1206, y: 477 };
+export const ELEVATOR_ROOM = { x: 510, y: 270, width: 430, height: 340, spawnX: 724, spawnY: 541, exitY: 550 };
