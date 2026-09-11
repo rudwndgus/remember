@@ -66,14 +66,15 @@ export default class BusInteriorScene extends Phaser.Scene {
   }
   update(time,delta) {
     if(!this.cabinImage) return;
-    const w=Math.round(this.scale.width),h=Math.round(this.scale.height);
+    const w=Math.round(this.cabin.clientWidth),h=Math.round(this.cabin.clientHeight);
+    if (!w || !h) return;
     if(this.cabin.width!==w||this.cabin.height!==h){this.cabin.width=w;this.cabin.height=h;}
     const c=this.cabinContext;c.imageSmoothingEnabled=false;
     this.travelPixels+=Math.min(delta,60)*.009;
     this.cabin.dataset.travel=String(Math.floor(this.travelPixels));
-    const portrait=h>w,artHeight=portrait?h*.73:h;
-    const zoom=Math.max(w/1448,artHeight/1086)*1.016;
-    const x=(w-1448*zoom)*(portrait?.24:.5),y=(artHeight-1086*zoom)*.45;
+    const mobile=window.matchMedia('(max-width: 600px)').matches,artHeight=h;
+    const zoom=mobile?Math.min((w-10)/1448,(h-10)/1086):Math.max(w/1448,h/1086)*1.016;
+    const x=(w-1448*zoom)/2,y=(artHeight-1086*zoom)/2;
     const bob=Math.sin(time*.0021)*2.3+Math.sin(time*.0071)*.65;
     const sway=Math.sin(time*.0014)*1.7;
     this.cabin.dataset.bob=bob.toFixed(2);

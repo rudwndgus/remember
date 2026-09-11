@@ -6,6 +6,7 @@ import BusBoardingScene from '../scenes/BusBoardingScene.js';
 import BusInteriorScene from '../scenes/BusInteriorScene.js';
 import ParkingGarageScene from '../scenes/ParkingGarageScene.js';
 import MapDissolveScene from '../scenes/MapDissolveScene.js';
+import PalparkTripScene from '../scenes/PalparkTripScene.js';
 import { COLORS } from '../utils/constants.js';
 
 const diagnostics = new URLSearchParams(window.location.search);
@@ -20,5 +21,5 @@ export const gameConfig = {
   physics: { default: 'arcade', arcade: { debug: false } },
   input: { activePointers: 3 },
   audio: { noAudio: true },
-  scene: [BootScene, TitleScene, OutsideScene, BusBoardingScene, BusInteriorScene, ParkingGarageScene, MapDissolveScene],
+  scene: [BootScene, TitleScene, OutsideScene, BusBoardingScene, BusInteriorScene, ParkingGarageScene, MapDissolveScene, PalparkTripScene],
 };

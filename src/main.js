@@ -5,6 +5,7 @@ import { setupAudioHooks } from './audio/hooks.js';
 import './style.css';
 import './bus.css';
 import './controller.css';
+import './journey.css';
 
 const pwa = setupPWA();
 const cleanupAudio = setupAudioHooks();
@@ -26,6 +27,13 @@ viewportObserver.observe(document.querySelector('#game'));
 const phaseListener = ({ detail: { phase } }) => {
   if (['playing', 'garage-playing'].includes(phase)) document.body.classList.add('controller-layout');
   if (['title', 'on-bus'].includes(phase)) document.body.classList.remove('controller-layout');
+  if (['car-trip', 'palpark'].includes(phase)) document.body.classList.remove('controller-layout');
+  if (phase === 'playing') {
+    const card = document.querySelector('.location-card');
+    card.classList.remove('location-brief');
+    void card.offsetWidth;
+    card.classList.add('location-brief');
+  }
   pwa.setIntroActive(!['title', 'playing', 'on-bus', 'garage-playing'].includes(phase));
   if (phase === 'logo-focus') window.dispatchEvent(new Event('remember:start'));
   const descriptions = {

@@ -1,0 +1,20 @@
+@keyframes location-brief { 0%,65% { opacity: 1; } 100% { opacity: 0; visibility: hidden; } }
+.location-card.location-brief { animation: location-brief 5s ease forwards; pointer-events: none; }
+@media (max-width: 600px) {
+  .bus-interior { display: flex; flex-direction: column; overflow-y: auto; background: #111827; padding: env(safe-area-inset-top) 10px max(12px, env(safe-area-inset-bottom)); }
+  .bus-interior .pixel-bus-cabin { position: relative; inset: auto; flex: 0 0 auto; width: 100%; height: auto; aspect-ratio: 4 / 3; }
+  .bus-interior .seat-dialogue { position: relative; inset: auto; width: 100%; max-width: none; max-height: none; overflow: visible; margin: 12px 0 0; padding: 14px; box-shadow: none; }
+  .bus-interior .seat-dialogue h1 { font-size: 21px; margin: 8px 0; }
+  .bus-interior .destination-button { min-height: 58px; }
+}
+.car-interact { position: absolute; right: 24px; bottom: 28px; pointer-events: auto; padding: 13px 20px; background: #273b33; border: 2px solid #c8be91; color: #fff0cc; font: bold 14px monospace; }
+@media (pointer: coarse) { .car-interact { display: none; } }
+.journey-dialog { position: fixed; z-index: 20; left: 50%; top: 50%; transform: translate(-50%,-50%); width: min(90vw,380px); padding: 22px; background: #22342d; border: 3px solid #a5ae91; box-shadow: 6px 6px #101e18; color: #f0e5cd; font-family: monospace; }
+.journey-dialog h2 { margin: 0 0 15px; font-size: 22px; }
+.journey-dialog button,.car-trip button { min-height: 46px; padding: 10px 16px; border: 2px solid #c9ba88; background: #385244; color: #fff0cc; margin: 6px; font-family: inherit; }
+.car-trip { position: fixed; inset: 0; z-index: 15; display: flex; flex-direction: column; background: #14251f; color: #f3e8ce; font: 15px monospace; overflow: auto; }
+.car-trip canvas { width: 100%; min-height: 0; flex: 1; object-fit: contain; image-rendering: pixelated; }
+.car-trip footer { text-align: center; padding: 16px max(12px,env(safe-area-inset-right)) max(16px,env(safe-area-inset-bottom)); }
+.car-trip h2 { margin: 0 0 10px; font-size: 22px; }
+.car-trip progress { width: min(75vw,340px); accent-color: #d4b372; }
+@media(max-width:600px) { .car-trip canvas { flex: 0 0 auto; aspect-ratio: 3 / 2; margin-top: auto; } .car-trip footer { margin-bottom: auto; } }

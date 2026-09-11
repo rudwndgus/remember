@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { startMapDissolve, anchorArrival, settleArrival, addMapSurround } from './MapDissolveScene.js';
 import TouchControls from '../ui/TouchControls.js';
+import ShaneTrip from '../systems/ShaneTrip.js';
 import CollisionLayer from '../maps/CollisionLayer.js';
 import { PLAYER } from '../utils/constants.js';
 import { PARKING_GARAGE, parkingGarageSpawnX, parkingGarageSpawnY, GARAGE_OBSTACLES, GARAGE_PLAYER_SCALE, garageExitTrigger } from '../data/parking-garage.js';
@@ -9,6 +10,11 @@ export default class ParkingGarageScene extends Phaser.Scene {
   constructor(key = 'ParkingGarageScene') { super(key); }
 
   create(data = {}) {
+    // Fetch the ride art during exploration, before the boarding sequence ends.
+    if (!this.textures.exists('shane-interior')) {
+      this.load.image('shane-interior', `${import.meta.env.BASE_URL}assets/car/shane-interior.png`);
+      this.load.start();
+    }
     const spawn = { x: parkingGarageSpawnX, y: parkingGarageSpawnY };
     this.arrivalAnchor = null;
     this.arrivalSettling = false;
@@ -25,6 +31,7 @@ export default class ParkingGarageScene extends Phaser.Scene {
     this.cursors = this.input.keyboard.createCursorKeys();
     this.wasd = this.input.keyboard.addKeys('W,A,S,D');
     this.touchControls = new TouchControls();
+    this.shaneTrip = new ShaneTrip(this);
     this.resetInput = () => { this.input.keyboard.resetKeys(); this.touchControls.reset(); };
     this.onVisibility = () => { if (document.hidden) this.resetInput(); };
     window.addEventListener('blur', this.resetInput);
@@ -69,6 +76,7 @@ export default class ParkingGarageScene extends Phaser.Scene {
   }
 
   update(time, delta) {
+    this.shaneTrip.update(delta);
     this.shadow.setPosition(this.player.x, this.player.y - 1);
     if (!this.controlsEnabled) {
       this.player.setTexture(`intern-${this.facing}-${Math.floor(time / 145) % 2 + 1}`);
@@ -120,7 +128,7 @@ export default class ParkingGarageScene extends Phaser.Scene {
   }
 
   updateAutomaticDoor(delta) {
-    const near = this.player.x > 642 && this.player.x < 816 && this.player.y > 515 && this.player.y < 785;
+    const near = this.shaneTrip?.stage === 'gathering' || (this.player.x > 642 && this.player.x < 816 && this.player.y > 515 && this.player.y < 785);
     if (near) this.doorHold = 900;
     else this.doorHold = Math.max(0, this.doorHold - delta);
     const target = this.doorHold > 0 ? 1 : 0;
