@@ -7,7 +7,7 @@ export default class PalparkTripScene extends Phaser.Scene {
     this.elapsed=0;this.arrived=false;
     document.querySelector('#game-hud').hidden=true;
     this.element=document.createElement('section');this.element.className='car-trip';
-    this.element.innerHTML='<canvas width="768" height="512" aria-label="Shane, 승애와 함께 팰팍으로 가는 길"></canvas><footer><h2>함께 팰팍으로</h2><p role="status">Shane이 운전하고, 승애와 나는 창밖을 바라본다.</p><progress max="12000" value="0" aria-label="팰팍까지 이동"></progress><button hidden>주차장으로 돌아가기</button></footer>';
+    this.element.innerHTML='<canvas width="768" height="512" aria-label="Shane, 승애와 함께 팰팍으로 가는 길"></canvas><footer><h2>함께 팰팍으로</h2><p role="status">Shane이 운전하고, 승애와 나는 창밖을 바라본다.</p><progress max="6000" value="0" aria-label="팰팍까지 이동"></progress><button hidden>주차장으로 돌아가기</button></footer>';
     document.querySelector('#app').append(this.element);
     this.canvas=this.element.querySelector('canvas');this.ctx=this.canvas.getContext('2d');this.ctx.imageSmoothingEnabled=false;
     this.image=this.textures.get('shane-interior').getSourceImage();
@@ -18,7 +18,7 @@ export default class PalparkTripScene extends Phaser.Scene {
   setPhase(phase){document.body.dataset.phase=phase;window.dispatchEvent(new CustomEvent('remember:phase',{detail:{phase}}));}
   update(time,delta){
     this.elapsed+=Math.min(delta,60);
-    if(this.elapsed>=12000&&!this.arrived){
+    if(this.elapsed>=6000&&!this.arrived){
       this.arrived=true;this.setPhase('palpark');
       this.element.querySelector('h2').textContent='팰팍에 도착했어!';
       this.element.querySelector('p').textContent='Shane · 승애 · 나 — 함께 온 Palisades Park';
@@ -53,9 +53,9 @@ export default class PalparkTripScene extends Phaser.Scene {
     c.fillStyle='#273d32';c.fillRect(220,22,328,43);c.strokeStyle='#b4bf95';c.lineWidth=3;c.strokeRect(220,22,328,43);
     c.fillStyle='#f3e7ba';c.font='bold 22px monospace';c.textAlign='center';c.fillText('PALISADES PARK',384,51);
     for(const x of [12,204,393,584,756]){c.fillStyle='#514e36';c.fillRect(x,258,8,40);c.fillStyle='#3e633e';c.fillRect(x-16,225,38,42);c.fillStyle='#78954b';c.fillRect(x-12,222,24,25);}
-    const y=512-Math.min(1,(this.elapsed-12000)/1800)*151;
-    c.drawImage(this.textures.get('parking-garage-map').getSourceImage(),57,542,134,96,365,y,90,64);
-    if(this.elapsed>13800){
+    const y=512-Math.min(1,(this.elapsed-6000)/1200)*151;
+    c.drawImage(this.textures.get('parking-garage-map').getSourceImage(),57,542,134,84,365,y,90,56);
+    if(this.elapsed>7200){
       for(const [key,x,label] of [['friend-Shane',367,'Shane'],['friend-승애',412,'승애'],['intern-down-0',457,'나']]){
         c.drawImage(this.textures.get(key).getSourceImage(),x,302,24,36);
         c.fillStyle='#fff0c9';c.font='11px monospace';c.fillText(label,x+12,296);

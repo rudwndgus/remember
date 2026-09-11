@@ -70,6 +70,7 @@ export default class ParkingGarageScene extends Phaser.Scene {
 
   resize() {
     this.camera.setSize(this.scale.width, this.scale.height);
+    if (this.shaneTrip?.stage === 'gathering') { this.shaneTrip.frameGathering(false); return; }
     const bounds = PARKING_GARAGE;
     this.camera.setZoom(Math.max(this.scale.width / bounds.width, this.scale.height / bounds.height));
     if (this.arrivalAnchor) anchorArrival(this, this.arrivalAnchor);
