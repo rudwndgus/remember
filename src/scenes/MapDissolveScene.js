@@ -44,7 +44,21 @@ export function settleArrival(scene, map) {
 export function addMapSurround(scene) {
   const texture = scene.textures.get('parking-garage-map');
   if (!texture.has('asphalt')) texture.add('asphalt', 0, 300, 750, 80, 80);
-  scene.add.tileSprite(-5000, -5000, 12000, 12000, 'parking-garage-map', 'asphalt').setOrigin(0).setDepth(-10);
+  // TileSprite allocates a canvas at its logical size even in WebGL. A 12k
+  // square used ~576 MB per scene and could exhaust mobile/browser memory.
+  // Cover only the viewport, compensating for the world camera's zoom.
+  const surround = scene.add.tileSprite(0, 0, scene.scale.width, scene.scale.height,
+    'parking-garage-map', 'asphalt').setOrigin(0).setScrollFactor(0).setDepth(-10);
+  const fit = () => {
+    const w = scene.scale.width, h = scene.scale.height;
+    const zoom = scene.cameras.main.zoom;
+    if (surround.width !== w || surround.height !== h) surround.setSize(w, h);
+    surround.setPosition(w / 2 - w / (2 * zoom), h / 2 - h / (2 * zoom));
+    surround.setScale(1 / zoom).setTileScale(zoom);
+  };
+  fit();
+  scene.events.on('prerender', fit);
+  scene.events.once('shutdown', () => scene.events.off('prerender', fit));
 }
 
 export default class MapDissolveScene extends Phaser.Scene {
