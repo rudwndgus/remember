@@ -17,7 +17,7 @@ export default class ParkingGarageScene extends Phaser.Scene {
     this.walkClock = 0;
     this.textures.get('parking-garage-map').setFilter(Phaser.Textures.FilterMode.NEAREST);
     addMapSurround(this);
-    this.add.image(0, 0, 'parking-garage-map').setOrigin(0);
+    this.mapImage = this.add.image(0, 0, 'parking-garage-map', '__BASE').setOrigin(0);
     this.createAutomaticDoor();
     this.shadow = this.add.ellipse(spawn.x, spawn.y - 1, 13 * GARAGE_PLAYER_SCALE, 5 * GARAGE_PLAYER_SCALE, 0x18221c, .25);
     this.player = this.add.sprite(spawn.x, spawn.y, `intern-${this.facing}-1`).setOrigin(.5, 1).setScale(GARAGE_PLAYER_SCALE);

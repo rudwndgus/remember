@@ -13,6 +13,11 @@ test('automatic lobby door opens, allows both directions, and closes without sto
   });
   await expect(page.locator('body')).toHaveAttribute('data-phase', 'garage-playing');
   expect(await page.evaluate(() => {
+    const map = window.__REMEMBER_GAME__.scene.getScene('ParkingGarageScene').mapImage;
+    return [map.frame.name, map.width, map.height];
+  })).toEqual(['__BASE', 1448, 1086]);
+  await page.screenshot({ path: 'artifacts/garage-map-restored.png' });
+  expect(await page.evaluate(() => {
     const s = window.__REMEMBER_GAME__.scene.getScene('ParkingGarageScene');
     return s.children.list.filter(child => child.type === 'TileSprite')
       .every(child => child.canvas.width <= s.scale.width && child.canvas.height <= s.scale.height);

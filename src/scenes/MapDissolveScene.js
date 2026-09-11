@@ -70,8 +70,9 @@ export default class MapDissolveScene extends Phaser.Scene {
     const map = data.entering ? PARKING_GARAGE : MAP;
     this.target = data.entering ? { x: parkingGarageSpawnX, y: parkingGarageSpawnY } : companyExitSpawn;
     this.targetScale = data.entering ? GARAGE_PLAYER_SCALE : 1;
-    this.source = this.add.image(0, 0, data.entering ? 'outside-map' : 'parking-garage-map').setOrigin(0);
-    this.destination = this.add.image(0, 0, data.entering ? 'parking-garage-map' : 'outside-map').setOrigin(0).setAlpha(0);
+    // Named detail frames change Texture.firstFrame; maps must use the full image.
+    this.source = this.add.image(0, 0, data.entering ? 'outside-map' : 'parking-garage-map', '__BASE').setOrigin(0);
+    this.destination = this.add.image(0, 0, data.entering ? 'parking-garage-map' : 'outside-map', '__BASE').setOrigin(0).setAlpha(0);
     this.shadow = this.add.ellipse(0, 0, 13, 5, 0x18221c, .25);
     this.actor = this.add.sprite(0, 0, `intern-${data.facing}-0`).setOrigin(.5, 1);
     this.progress = { zoom: 0, dissolve: 0 };
