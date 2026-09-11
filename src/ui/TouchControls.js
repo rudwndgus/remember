@@ -26,6 +26,16 @@ export default class TouchControls {
     this.pad = element.querySelector('.joystick');
     this.thumb = element.querySelector('.joystick__thumb');
     this.buttons = [...element.querySelectorAll('.direction-button')];
+    this.action = document.createElement('button');
+    this.action.type = 'button';
+    this.action.className = 'controller-action';
+    this.action.innerHTML = '<span aria-hidden="true">A</span><small>상호작용</small>';
+    this.action.setAttribute('aria-label', '상호작용');
+    this.action.disabled = true;
+    element.append(this.action);
+    this.on(this.action, 'click', () => {
+      if (this.enabled && this.actionAvailable) window.dispatchEvent(new Event('remember:interact'));
+    });
 
     this.on(this.pad, 'pointerdown', (event) => {
       if (!this.enabled || this.pointerId !== null) return;
@@ -105,6 +115,7 @@ export default class TouchControls {
 
   setEnabled(enabled) {
     this.enabled = enabled;
+    if (this.action) this.action.disabled = !enabled || !this.actionAvailable;
     if (this.element) {
       this.element.classList.toggle('is-enabled', enabled);
       this.element.setAttribute('aria-hidden', String(!enabled));
@@ -133,5 +144,15 @@ export default class TouchControls {
     this.listeners.forEach((remove) => remove());
     this.listeners = [];
     if (this.element) this.element.replaceChildren();
+  }
+
+  setAction(available, label = '상호작용') {
+    this.actionAvailable = available;
+    if (!this.action) return;
+    this.action.disabled = !this.enabled || !available;
+    if (this.action.getAttribute('aria-label') !== label) {
+      this.action.setAttribute('aria-label', label);
+      this.action.querySelector('small').textContent = label;
+    }
   }
 }

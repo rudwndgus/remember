@@ -4,6 +4,7 @@ import { setupPWA } from './pwa.js';
 import { setupAudioHooks } from './audio/hooks.js';
 import './style.css';
 import './bus.css';
+import './controller.css';
 
 const pwa = setupPWA();
 const cleanupAudio = setupAudioHooks();
@@ -23,6 +24,8 @@ const viewportObserver = new ResizeObserver(([entry]) => {
 viewportObserver.observe(document.querySelector('#game'));
 
 const phaseListener = ({ detail: { phase } }) => {
+  if (['playing', 'garage-playing'].includes(phase)) document.body.classList.add('controller-layout');
+  if (['title', 'on-bus'].includes(phase)) document.body.classList.remove('controller-layout');
   pwa.setIntroActive(!['title', 'playing', 'on-bus', 'garage-playing'].includes(phase));
   if (phase === 'logo-focus') window.dispatchEvent(new Event('remember:start'));
   const descriptions = {

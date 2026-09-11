@@ -1,0 +1,29 @@
+.controller-action { display: none; }
+@media (hover: none), (pointer: coarse) {
+  body.controller-layout { --controller-height: calc(108px + env(safe-area-inset-bottom)); }
+  body.controller-layout #game { bottom: var(--controller-height); }
+  body.controller-layout #touch-controls {
+    display: flex; position: fixed; inset: auto 0 0; height: var(--controller-height);
+    padding: 10px max(28px, env(safe-area-inset-right)) calc(10px + env(safe-area-inset-bottom)) max(28px, env(safe-area-inset-left));
+    align-items: center; justify-content: space-between; background: #27372f;
+    border-top: 3px solid #75816a; box-shadow: inset 0 4px #19271f; opacity: 1; z-index: 5;
+  }
+  body.controller-layout .joystick { width: 84px; height: 84px; background: #17271e; backdrop-filter: none; border: 2px solid #7b8970; }
+  body.controller-layout .joystick__thumb { width: 36px; height: 36px; background: #c4ceb0; box-shadow: 0 3px #0f2019; }
+  body.controller-layout .direction-buttons { left: 12px; top: 0; }
+  body.controller-layout .controller-action { display: flex; align-items: center; flex-direction: column; gap: 5px; width: 76px; padding: 0; background: none; border: 0; touch-action: manipulation; }
+  .controller-action > span { display: grid; place-items: center; width: 54px; height: 54px; border: 2px solid #e7d8a7; border-radius: 50%; background: #b9914d; color: #17271e; box-shadow: 0 4px #131f18; font: bold 22px monospace; }
+  .controller-action small { font: 11px 'Segoe UI', sans-serif; color: #e5e8d7; }
+  .controller-action:disabled { opacity: .45; }
+  .controller-action:active:not(:disabled) > span { transform: translateY(3px); box-shadow: 0 1px #131f18; }
+  body.controller-layout .world-wordmark, body.controller-layout .world-footer { display: none; }
+  body.controller-layout .board-bus { display: none; }
+  body.controller-layout .bus-cue { bottom: calc(var(--controller-height) + 12px); max-width: calc(100% - 24px); }
+  body.controller-layout .pwa-notice { bottom: calc(var(--controller-height) + 12px); }
+}
+@media (hover: none) and (max-height: 520px), (pointer: coarse) and (max-height: 520px) {
+  body.controller-layout { --controller-height: calc(86px + env(safe-area-inset-bottom)); }
+  body.controller-layout #touch-controls { padding-top: 6px; padding-bottom: calc(6px + env(safe-area-inset-bottom)); }
+  body.controller-layout .joystick { width: 68px; height: 68px; }
+  .controller-action > span { width: 46px; height: 46px; }
+}

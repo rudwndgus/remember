@@ -17,6 +17,7 @@ export default class Bus163Event {
     this.button.type='button';this.button.innerHTML='<span class="action-key">E</span><span>Board Bus 163<small>THE NEXT LITTLE CHAPTER</small></span><span aria-hidden="true">↗</span>';
     document.querySelector('#game-hud').append(this.cue,this.button);
     this.onBoard=()=>this.board();this.button.addEventListener('click',this.onBoard);
+    window.addEventListener('remember:interact', this.onBoard);
     this.onKey=(event)=>{
       if(!event.repeat && this.scene.scene.isActive() && ['KeyE','Enter'].includes(event.code)
         && !event.target.closest?.('.pwa-notice')) {if(this.board()) event.preventDefault();}
@@ -72,6 +73,7 @@ export default class Bus163Event {
     this.cue.hidden=!messages[this.state] || (this.state==='BUS_READY'&&!this.near());
     this.cue.querySelector('.bus-cue-text').textContent=messages[this.state]||'';
     this.button.hidden=this.state!=='BUS_READY'||!this.near();
+    this.scene.touchControls?.setAction(!this.button.hidden, this.button.hidden ? '상호작용' : '탑승');
   }
   board() {
     if(this.state!=='BUS_READY' || !this.near() || !this.scene.scene.isActive()) return false;
@@ -89,5 +91,5 @@ export default class Bus163Event {
     this.bus=null;this.leaveBeforeWaiting=true;this.waitElapsed=0;
     this.setState('IDLE');this.renderCue();this.scene.setPlayerControl(true);
   }
-  destroy() {window.removeEventListener('keydown',this.onKey);this.button.removeEventListener('click',this.onBoard);this.cue.remove();this.button.remove();}
+  destroy() {window.removeEventListener('remember:interact',this.onBoard);window.removeEventListener('keydown',this.onKey);this.button.removeEventListener('click',this.onBoard);this.cue.remove();this.button.remove();}
 }
